@@ -11,8 +11,19 @@ namespace NelaSystem.ChipLisp {
     }
 
     public class LexerException : Exception {
+        private static string MakeMessage(Lexer lexer, string restMessage) {
+            var (sourceLine, sourceColumn) = lexer.GetCurrentSourcePos();
+            return $"Lexing Error at {sourceLine}:{sourceColumn}\n{restMessage}";
+        }
+
+        public readonly string restMessage;
+        public readonly (int, int) sourcePos;
+
         public LexerException(Lexer lexer, string message)
-            : base ($"Lexing Error at {lexer.GetCurrentSourcePos()}\n{message}") {}
+            : base(MakeMessage(lexer, message)) {
+            this.sourcePos = lexer.GetCurrentSourcePos();
+            this.restMessage = message;
+        }
     }
 
     public class RuntimeException : Exception {
