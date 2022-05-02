@@ -29,6 +29,24 @@ namespace NelaSystem.ChipLisp {
             return null;
         }
 
+        public static Obj ExpectList1(this VM vm, Obj list) {
+            var enumerator = list.GetListEnumerator();
+            if (enumerator.GetNext(out var r) && !enumerator.MoveNext()) {
+                return r;
+            }
+            vm.Error($"Expected list of 1 but got {list}");
+            return null;
+        }
+
+        public static (Obj, Obj) ExpectList2(this VM vm, Obj list) {
+            var enumerator = list.GetListEnumerator();
+            if (enumerator.GetNext(out var r1) && enumerator.GetNext(out var r2) && !enumerator.MoveNext()) {
+                return (r1, r2);
+            }
+            vm.Error($"Expected list of 2 but got {list}");
+            return (null, null);
+        }
+
         public static bool ReadChar(this TextReader reader, out char c) {
             int b = reader.Read();
             if (b == -1) {

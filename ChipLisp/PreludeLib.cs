@@ -3,16 +3,39 @@ using System;
 namespace NelaSystem.ChipLisp {
     public class PreludeLib {
         public static void Load(State state) {
+            state.AddFunction("cons", Prim_Cons);
+            state.AddFunction("car", Prim_Car);
+            state.AddFunction("cdr", Prim_Cdr);
             state.AddFunction("+", Prim_Plus);
             state.AddFunction("-", Prim_Minus);
-            state.AddMacro("define", Prim_Define);
-            state.AddMacro("defun", Prim_Defun);
-            state.AddMacro("defmacro", Prim_Defmacro);
-            state.AddMacro("lambda", Prim_Lambda);
+            state.AddFunction("<", Prim_Lt);
+            state.AddFunction("=", Prim_NumEq);
+            state.AddFunction("eq", Prim_Eq);
+            state.AddPrimitive("define", Prim_Define);
+            state.AddPrimitive("defun", Prim_Defun);
+            state.AddPrimitive("defmacro", Prim_Defmacro);
+            state.AddPrimitive("lambda", Prim_Lambda);
+            state.AddPrimitive("macroexpand", Prim_MacroExpand);
+            state.AddPrimitive("if", Prim_If);
+            state.AddPrimitive("while", Prim_While);
         }
 
-        private static Obj Prim_Plus(VM vm, Env env, Obj list) {
-            var enumerator = list.GetListEnumerator();
+        private static Obj Prim_Cons(VM vm, Env env, Obj args) {
+            var (_, rhs) = vm.ExpectList2(args);
+            (args as CellObj).cdr = rhs;
+            return args;
+        }
+
+        private static Obj Prim_Car(VM vm, Env env, Obj args) {
+            return vm.Expect<CellObj>(vm.ExpectList1(args)).car;
+        }
+
+        private static Obj Prim_Cdr(VM vm, Env env, Obj args) {
+            return vm.Expect<CellObj>(vm.ExpectList1(args)).cdr;
+        }
+
+        private static Obj Prim_Plus(VM vm, Env env, Obj args) {
+            var enumerator = args.GetListEnumerator();
             if (!enumerator.GetNext(out var first)) {
                 vm.Error("no arguments");
                 return null;
@@ -42,8 +65,8 @@ namespace NelaSystem.ChipLisp {
             return null;
         }
 
-        private static Obj Prim_Minus(VM vm, Env env, Obj list) {
-            var enumerator = list.GetListEnumerator();
+        private static Obj Prim_Minus(VM vm, Env env, Obj args) {
+            var enumerator = args.GetListEnumerator();
             if (!enumerator.GetNext(out var first)) {
                 vm.Error("no arguments");
                 return null;
@@ -74,6 +97,35 @@ namespace NelaSystem.ChipLisp {
             }
 
             vm.Error("- takes only numbers");
+            return null;
+        }
+
+        private static Obj Prim_Lt(VM vm, Env env, Obj args) {
+            var (lhs, rhs) = vm.ExpectList2(args);
+            if (lhs is NativeObj<int> lhsInt) {
+                return lhsInt.value < vm.Expect<NativeObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
+            }
+
+            if (lhs is NativeObj<float> lhsFloat) {
+                return lhsFloat.value < vm.Expect<NativeObj<float>>(rhs).value ? (Obj) TrueObj.t : Obj.nil;
+            }
+
+            vm.Error("< takes only numbers");
+            return null;
+        }
+
+        private static Obj Prim_NumEq(VM vm, Env env, Obj args) {
+            var (lhs, rhs) = vm.ExpectList2(args);
+            return vm.Expect<NativeObj<int>>(lhs).value == vm.Expect<NativeObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
+        }
+
+        private static Obj Prim_Eq(VM vm, Env env, Obj args) {
+            var enumerator = args.GetListEnumerator();
+            if (enumerator.GetNext(out var lhs) && enumerator.GetNext(out var rhs) && !enumerator.MoveNext()) {
+                return lhs == rhs ? (Obj)TrueObj.t : Obj.nil;
+            }
+
+            vm.Error("malformed eq");
             return null;
         }
 
@@ -112,6 +164,40 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj Prim_Lambda(VM vm, Env env, Obj list) {
             return HandleFunction<FuncObj>(vm, env, list);
+        }
+
+        private static Obj Prim_MacroExpand(VM vm, Env env, Obj list) {
+            var enumerator = list.GetListEnumerator();
+            if (enumerator.GetNext(out var body) && !enumerator.MoveNext()) {
+                vm.MacroExpand(env, body, out var ret);
+                return ret;
+            }
+            vm.Error("malformed macroexpand");
+            return null;
+        }
+
+        private static Obj Prim_If(VM vm, Env env, Obj list) {
+            var cell = vm.Expect<CellObj>(list);
+            var cond = cell.car;
+            var thenGroup = vm.Expect<CellObj>(cell.cdr);
+            cond = vm.Eval(env, cond);
+            if (cond != Obj.nil) {
+                return vm.Eval(env, thenGroup.car);
+            }
+
+            var els = thenGroup.cdr;
+            return els == Obj.nil ? Obj.nil : vm.Progn(env, els);
+        }
+
+        private static Obj Prim_While(VM vm, Env env, Obj list) {
+            var cell = vm.Expect<CellObj>(list);
+            var cond = cell.car;
+            var body = vm.Expect<CellObj>(cell.cdr);
+            while (vm.Eval(env, cond) != Obj.nil) {
+                var exprs = cell.cdr;
+                vm.EvalList(env, exprs);
+            }
+            return Obj.nil;
         }
 
         private static Obj HandleFunction<T>(VM vm, Env env, Obj list) where T : FuncObj, new() {

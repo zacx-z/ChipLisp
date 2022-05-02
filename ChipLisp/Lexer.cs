@@ -94,6 +94,9 @@ namespace NelaSystem.ChipLisp {
                 else break;
             }
 
+            if (char.IsLetter(head) || symbolChars.IndexOf(head) != -1)
+                throw new LexerException(this, $"Unexpected character {head}");
+
             if (negative) val = -val;
 
             return new NativeObj<int>(val);
@@ -106,6 +109,9 @@ namespace NelaSystem.ChipLisp {
                 val += head - '0';
                 val /= 10;
             } while (NextChar() && char.IsDigit(head));
+
+            if (char.IsLetter(head) || symbolChars.IndexOf(head) != -1)
+                throw new LexerException(this, $"Unexpected character {head}");
 
             return val;
         }

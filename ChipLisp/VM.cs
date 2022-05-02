@@ -38,7 +38,7 @@ namespace NelaSystem.ChipLisp {
                         try {
                             return Apply(env, fn, args);
                         }
-                        catch (InvalidCallException e) {
+                        catch (InvalidCallException) {
                             throw new Exception($"Invalid Call: {cell.car} is not a function");
                         }
                 }
@@ -52,7 +52,7 @@ namespace NelaSystem.ChipLisp {
 
         public bool MacroExpand(Env env, Obj obj, out Obj expanded) {
             if (!(obj is CellObj cell && cell.car is SymObj sym)) {
-                expanded = Obj.nil;
+                expanded = obj;
                 return false;
             }
 
@@ -121,7 +121,7 @@ namespace NelaSystem.ChipLisp {
                 try {
                     argValues = EvalList(env, args);
                 }
-                catch (NotListException e) {
+                catch (NotListException) {
                     throw new ArgumentException("arguments must be a list");
                 }
                 return ApplyFunc(env, func, argValues);
