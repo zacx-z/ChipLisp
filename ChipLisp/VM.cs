@@ -1,0 +1,223 @@
+using System;
+using System.IO;
+using System.Collections.Generic;
+
+namespace NelaSystem.ChipLisp {
+    public class VM {
+        public static VM vm = new VM();
+
+        private Dictionary<string, SymObj> symbols = new Dictionary<string, SymObj>();
+
+        public SymObj Intern(string name) {
+            if (symbols.TryGetValue(name, out var ret)) {
+                return ret;
+            }
+            ret = new SymObj() { name = name };
+            symbols.Add(name, ret);
+            return ret;
+        }
+
+        public Obj Eval(Env env, Obj obj) {
+            switch (obj) {
+            case NativeObj oNt:
+            case PrimObj oPrim:
+            case FuncObj oFunc:
+            case NilObj oNil:
+                return obj;
+            case SymObj symObj:
+                return env.Find(symObj).cdr;
+            case CellObj cell:
+                if (MacroExpand(env, obj, out var expanded)) {
+                    return Eval(env, expanded);
+                }
+
+                var fn = Eval(env, cell.car);
+                var args = cell.cdr;
+
+                try {
+                    return Apply(env, fn, args);
+                }
+                catch (InvalidCallException e) {
+                    throw new Exception($"Invalid Call: {cell.car} is not a function");
+                }
+            }
+
+            throw new InvalidDataException($"Eval: Unknown type: {obj}");
+        }
+
+        public bool MacroExpand(Env env, Obj obj, out Obj expanded) {
+            if (!(obj is CellObj cell && cell.car is SymObj sym)) {
+                expanded = Obj.nil;
+                return false;
+            }
+
+            var bind = env.Find(sym);
+            if (bind == null || !(bind.cdr is MacroObj macro)) {
+                expanded = Obj.nil;
+                return false;
+            }
+
+            var args = cell.cdr;
+            expanded = ApplyFunc(env, macro, args);
+            return true;
+        }
+
+        public Obj ReadExpr(TextReader reader) => ReadExpr(new Lexer(this, reader));
+
+        public Obj ReadExpr(Lexer lexer) {
+            while (true) {
+                if (lexer.isEnd) return null;
+                switch (lexer.head) {
+                case ' ':
+                case '\n':
+                case '\r':
+                case '\t':
+                    lexer.ReadNext();
+                    break;
+                case ';':
+                    lexer.SkipLine();
+                    break;
+                case '(':
+                    lexer.ReadNext();
+                    return ReadList(lexer);
+                case ')':
+                    return lexer.ReadAs(CparenObj.cparen);
+                case '.':
+                    return lexer.ReadAs(DotObj.dot);
+                case '\'':
+                    lexer.ReadNext();
+                    return ReadQuote(lexer);
+                default:
+                    return lexer.Read();
+                }
+            }
+        }
+
+        public Obj Apply(Env env, Obj fn, Obj args) {
+            if (fn is PrimObj prim) {
+                try {
+                    return prim.func(this, env, args);
+                }
+                catch (NotListException e) {
+                    if (e.obj == args) {
+                        throw new ArgumentException("arguments must be a list");
+                    }
+                    throw;
+                }
+            }
+
+            if (fn is FuncObj func) {
+                Obj argValues;
+                try {
+                    argValues = EvalList(env, args);
+                }
+                catch (NotListException e) {
+                    throw new ArgumentException("arguments must be a list");
+                }
+                return ApplyFunc(env, func, argValues);
+            }
+
+            throw new InvalidCallException();
+        }
+
+        public Obj ApplyFunc(Env obj, FuncObj fn, Obj args) {
+            var pmtrs = fn.pmtrs;
+            var env = PushEnv(fn.env, pmtrs, args);
+            var body = fn.body;
+            return Progn(env, body);
+        }
+
+        public Obj EvalList(Env env, Obj list) {
+            Obj head = Obj.nil;
+            var lp = list;
+            for (; lp is CellObj cell;lp = cell.cdr) {
+                var expr = cell.car;
+                var res = Eval(env, expr);
+                head = Cons(res, head);
+            }
+
+            if (lp != Obj.nil) throw new NotListException(list);
+
+            return Reverse(head);
+        }
+
+        public Obj Progn(Env env, Obj list) {
+            Obj r = Obj.nil;
+
+            var lp = list;
+            for (; lp is CellObj cell;lp = cell.cdr) {
+                r = cell.car;
+                r = Eval(env, r);
+            }
+
+            if (lp != Obj.nil) throw new NotListException(list);
+            return r;
+        }
+
+        public Env PushEnv(Env env, Obj vars, Obj vals) {
+            var map = new List<CellObj>();
+            for (; vars is CellObj cvars && vals is CellObj cvals; vars = cvars.cdr, vals = cvals.cdr) {
+                var sym = cvars.car;
+                var val = cvals.car;
+                map.Add(new CellObj(sym, val));
+            }
+
+            if (vars != Obj.nil) {
+                map.Add(new CellObj(vars, vals));
+            }
+
+            return new Env(map, env);
+        }
+
+        // Destructively reverses the given list
+        public Obj Reverse(Obj p) {
+            Obj ret = Obj.nil;
+            while (p != Obj.nil) {
+                var head = p as CellObj;
+                p = head.cdr;
+                head.cdr = ret;
+                ret = head;
+            }
+
+            return ret;
+        }
+
+        public CellObj Cons(Obj car, Obj cdr) {
+            return new CellObj(car, cdr);
+        }
+
+        public CellObj ACons(Obj x, Obj y, Obj a) {
+            return Cons(Cons(x, y), a);
+        }
+
+        public void Error(string errorMessage) {
+            throw new RuntimeException(errorMessage);
+        }
+
+        private Obj ReadList(Lexer lexer) {
+            Obj head = Obj.nil;
+            while (true) {
+                var obj = ReadExpr(lexer);
+                if (obj == null)
+                    throw new Exception("unclosed parenthesis");
+                if (obj == CparenObj.cparen)
+                    return Reverse(head);
+                if (obj == DotObj.dot) {
+                    var last = ReadExpr(lexer);
+                    if (ReadExpr(lexer) != CparenObj.cparen)
+                        throw new Exception("Closed parenthesis expected after dot");
+                    var ret = Reverse(head);
+                    (head as CellObj).cdr = last;
+                    return ret;
+                }
+
+                head = Cons(obj, head);
+            }
+        }
+
+        private Obj ReadQuote(Lexer lexer) {
+            var sym = Intern("quote");
+            return Cons(sym, Cons(ReadExpr(lexer), Obj.nil));
+        }
+    }
+}
