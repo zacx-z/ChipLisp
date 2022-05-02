@@ -83,7 +83,7 @@ namespace NelaSystem.ChipLisp {
         }
 
         public override void Print(TextWriter writer) {
-            writer.Write($"<primitive {func}>");
+            writer.Write($"<primitive>");
         }
     }
 

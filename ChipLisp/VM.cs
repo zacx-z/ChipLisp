@@ -112,7 +112,7 @@ namespace NelaSystem.ChipLisp {
                     throw;
                 }
                 catch (RuntimeException e) {
-                    throw new PrimitiveRuntimeException(fn, e.Message);
+                    throw new PrimitiveRuntimeException(fn, $"{e.Message}\n{e.StackTrace}");
                 }
             }
 

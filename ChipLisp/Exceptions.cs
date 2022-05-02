@@ -2,12 +2,17 @@ using System;
 
 namespace NelaSystem.ChipLisp {
     public class InterpreterException : Exception {
-        public Exception exception { get; private set; }
+        public Exception inner { get; private set; }
 
-        public InterpreterException(Obj expr, Exception exception)
-            : base($"Exception thrown while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{exception.Message}") {
-            this.exception = exception;
+        public InterpreterException(Obj expr, Exception inner)
+            : base($"Exception thrown while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{inner.Message}") {
+            this.inner = inner;
         }
+    }
+
+    public class LexerException : Exception {
+        public LexerException(Lexer lexer, string message)
+            : base ($"Lexing Error at {lexer.GetCurrentSourcePos()}\n{message}") {}
     }
 
     public class RuntimeException : Exception {

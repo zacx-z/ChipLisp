@@ -23,7 +23,9 @@ namespace NelaSystem.ChipLisp {
             if (obj is T o) {
                 return o;
             }
-            vm.Error($"expect type of {typeof(T)}; got {obj}");
+
+            var t = typeof(T);
+            vm.Error($"Expected type of {(typeof(NativeObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name)} but got {obj}");
             return null;
         }
 

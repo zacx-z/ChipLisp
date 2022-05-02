@@ -30,11 +30,16 @@ namespace NelaSystem.ChipLisp {
         }
 
         private Obj Read() {
-            if (head == '-') {
+            switch (head) {
+            case '\"':
+                return ReadString();
+            case '-':
                 if (reader.PeekChar(out var ch)&& char.IsDigit(ch)) {
                     NextChar();
                     return ReadNumber(true);
                 }
+
+                break;
             }
 
             if (char.IsDigit(head))
@@ -42,7 +47,7 @@ namespace NelaSystem.ChipLisp {
             if (char.IsLetter(head) || symbolChars.IndexOf(head) != -1)
                 return ReadSymbol();
 
-            throw new InvalidDataException($"Don't know how to handle {head}");
+            throw new LexerException(this, $"Unexpected character encountered: {head}");
         }
 
         public bool NextChar() {
@@ -103,6 +108,20 @@ namespace NelaSystem.ChipLisp {
             } while (NextChar() && char.IsDigit(head));
 
             return val;
+        }
+
+        private NativeObj<string> ReadString() {
+            var str = new StringBuilder();
+            while (NextChar() && head != '\"') {
+                str.Append(head);
+            }
+
+            if (head == '\"') {
+                NextChar();
+                return new NativeObj<string>(str.ToString());
+            }
+
+            throw new LexerException(this, "Unexpected end of file.");
         }
 
         private SymObj ReadSymbol() {
