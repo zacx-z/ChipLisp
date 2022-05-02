@@ -11,6 +11,7 @@ namespace NelaSystem.ChipLisp {
             state.AddFunction("<", Prim_Lt);
             state.AddFunction("=", Prim_NumEq);
             state.AddFunction("eq", Prim_Eq);
+            state.AddFunction("eval", Prim_Eval);
             state.AddPrimitive("define", Prim_Define);
             state.AddPrimitive("defun", Prim_Defun);
             state.AddPrimitive("defmacro", Prim_Defmacro);
@@ -120,13 +121,13 @@ namespace NelaSystem.ChipLisp {
         }
 
         private static Obj Prim_Eq(VM vm, Env env, Obj args) {
-            var enumerator = args.GetListEnumerator();
-            if (enumerator.GetNext(out var lhs) && enumerator.GetNext(out var rhs) && !enumerator.MoveNext()) {
-                return lhs == rhs ? (Obj)TrueObj.t : Obj.nil;
-            }
+            var (lhs, rhs) = vm.ExpectList2(args);
+            return lhs == rhs ? (Obj)TrueObj.t : Obj.nil;
+        }
 
-            vm.Error("malformed eq");
-            return null;
+        private static Obj Prim_Eval(VM vm, Env env, Obj args) {
+            var arg = vm.ExpectList1(args);
+            return vm.Eval(env, arg);
         }
 
         private static Obj Prim_Define(VM vm, Env env, Obj list) {
