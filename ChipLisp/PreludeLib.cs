@@ -22,12 +22,7 @@ namespace NelaSystem.ChipLisp {
                 int sum = it.value;
 
                 while (enumerator.GetNext(out var arg)) {
-                    if (arg is NativeObj<int> i) {
-                        sum += i.value;
-                    }
-                    else {
-                        vm.Error("+ takes only numbers");
-                    }
+                    sum += vm.Expect<NativeObj<int>>(arg).value;
                 }
 
                 return new NativeObj<int>(sum);
@@ -37,12 +32,7 @@ namespace NelaSystem.ChipLisp {
                 float sum = fl.value;
 
                 while (enumerator.GetNext(out var arg)) {
-                    if (arg is NativeObj<float> f) {
-                        sum += f.value;
-                    }
-                    else {
-                        vm.Error("+ takes only numbers");
-                    }
+                    sum += vm.Expect<NativeObj<float>>(arg).value;
                 }
 
                 return new NativeObj<float>(sum);
@@ -64,13 +54,8 @@ namespace NelaSystem.ChipLisp {
                 int l = 1;
 
                 while (enumerator.GetNext(out var arg)) {
-                    if (arg is NativeObj<int> i) {
-                        ret -= i.value;
-                        l++;
-                    }
-                    else {
-                        vm.Error("- takes only numbers");
-                    }
+                    ret -= vm.Expect<NativeObj<int>>(arg).value;
+                    l++;
                 }
 
                 return new NativeObj<int>(l == 1 ? -ret : ret);
@@ -81,13 +66,8 @@ namespace NelaSystem.ChipLisp {
                 int l = 1;
 
                 while (enumerator.GetNext(out var arg)) {
-                    if (arg is NativeObj<float> f) {
-                        ret -= f.value;
-                        l++;
-                    }
-                    else {
-                        vm.Error("- takes only numbers");
-                    }
+                    ret -= vm.Expect<NativeObj<float>>(arg).value;
+                    l++;
                 }
 
                 return new NativeObj<float>(l == 1 ? -ret : ret);

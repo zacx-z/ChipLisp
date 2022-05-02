@@ -5,6 +5,8 @@ namespace NelaSystem.ChipLisp {
     public abstract class Obj {
         public static NilObj nil = new NilObj();
 
+        public (int, int) sourcePos = (-1, -1);
+
         public abstract void Print(TextWriter writer);
 
         public override string ToString() {

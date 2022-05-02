@@ -19,6 +19,14 @@ namespace NelaSystem.ChipLisp {
             return new ListEnumerator(self);
         }
 
+        public static T Expect<T>(this VM vm, Obj obj) where T : Obj {
+            if (obj is T o) {
+                return o;
+            }
+            vm.Error($"expect type of {typeof(T)}; got {obj}");
+            return null;
+        }
+
         public static bool ReadChar(this TextReader reader, out char c) {
             int b = reader.Read();
             if (b == -1) {

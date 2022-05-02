@@ -18,28 +18,33 @@ namespace NelaSystem.ChipLisp {
         }
 
         public Obj Eval(Env env, Obj obj) {
-            switch (obj) {
-            case NativeObj oNt:
-            case PrimObj oPrim:
-            case FuncObj oFunc:
-            case NilObj oNil:
-                return obj;
-            case SymObj symObj:
-                return env.Find(symObj).cdr;
-            case CellObj cell:
-                if (MacroExpand(env, obj, out var expanded)) {
-                    return Eval(env, expanded);
-                }
+            try {
+                switch (obj) {
+                    case NativeObj oNt:
+                    case PrimObj oPrim:
+                    case FuncObj oFunc:
+                    case NilObj oNil:
+                        return obj;
+                    case SymObj symObj:
+                        return env.Find(symObj).cdr;
+                    case CellObj cell:
+                        if (MacroExpand(env, obj, out var expanded)) {
+                            return Eval(env, expanded);
+                        }
 
-                var fn = Eval(env, cell.car);
-                var args = cell.cdr;
+                        var fn = Eval(env, cell.car);
+                        var args = cell.cdr;
 
-                try {
-                    return Apply(env, fn, args);
+                        try {
+                            return Apply(env, fn, args);
+                        }
+                        catch (InvalidCallException e) {
+                            throw new Exception($"Invalid Call: {cell.car} is not a function");
+                        }
                 }
-                catch (InvalidCallException e) {
-                    throw new Exception($"Invalid Call: {cell.car} is not a function");
-                }
+            }
+            catch (Exception e) {
+                throw new InterpreterException(obj, e);
             }
 
             throw new InvalidDataException($"Eval: Unknown type: {obj}");
@@ -69,26 +74,27 @@ namespace NelaSystem.ChipLisp {
                 if (lexer.isEnd) return null;
                 switch (lexer.head) {
                 case ' ':
-                case '\n':
                 case '\r':
                 case '\t':
-                    lexer.ReadNext();
+                    lexer.NextChar();
+                    break;
+                case '\n':
+                    lexer.NextChar();
+                    lexer.OnNextLine();
                     break;
                 case ';':
                     lexer.SkipLine();
                     break;
                 case '(':
-                    lexer.ReadNext();
                     return ReadList(lexer);
                 case ')':
                     return lexer.ReadAs(CparenObj.cparen);
                 case '.':
                     return lexer.ReadAs(DotObj.dot);
                 case '\'':
-                    lexer.ReadNext();
                     return ReadQuote(lexer);
                 default:
-                    return lexer.Read();
+                    return lexer.ReadObj();
                 }
             }
         }
@@ -102,7 +108,11 @@ namespace NelaSystem.ChipLisp {
                     if (e.obj == args) {
                         throw new ArgumentException("arguments must be a list");
                     }
+
                     throw;
+                }
+                catch (RuntimeException e) {
+                    throw new PrimitiveRuntimeException(fn, e.Message);
                 }
             }
 
@@ -117,7 +127,7 @@ namespace NelaSystem.ChipLisp {
                 return ApplyFunc(env, func, argValues);
             }
 
-            throw new InvalidCallException();
+            throw new InvalidCallException(fn);
         }
 
         public Obj ApplyFunc(Env obj, FuncObj fn, Obj args) {
@@ -186,28 +196,31 @@ namespace NelaSystem.ChipLisp {
             return new CellObj(car, cdr);
         }
 
-        public CellObj ACons(Obj x, Obj y, Obj a) {
-            return Cons(Cons(x, y), a);
-        }
-
         public void Error(string errorMessage) {
             throw new RuntimeException(errorMessage);
         }
 
         private Obj ReadList(Lexer lexer) {
+            var sourcePos = lexer.GetCurrentSourcePos();
+            lexer.NextChar();
             Obj head = Obj.nil;
             while (true) {
                 var obj = ReadExpr(lexer);
                 if (obj == null)
                     throw new Exception("unclosed parenthesis");
-                if (obj == CparenObj.cparen)
-                    return Reverse(head);
+                if (obj == CparenObj.cparen) {
+                    var ret = Reverse(head);
+                    ret.sourcePos = sourcePos;
+                    return ret;
+                }
+
                 if (obj == DotObj.dot) {
                     var last = ReadExpr(lexer);
                     if (ReadExpr(lexer) != CparenObj.cparen)
                         throw new Exception("Closed parenthesis expected after dot");
                     var ret = Reverse(head);
                     (head as CellObj).cdr = last;
+                    ret.sourcePos = sourcePos;
                     return ret;
                 }
 
@@ -216,8 +229,12 @@ namespace NelaSystem.ChipLisp {
         }
 
         private Obj ReadQuote(Lexer lexer) {
+            var sourcePos = lexer.GetCurrentSourcePos();
+            lexer.NextChar();
             var sym = Intern("quote");
-            return Cons(sym, Cons(ReadExpr(lexer), Obj.nil));
+            var o = Cons(sym, Cons(ReadExpr(lexer), Obj.nil));
+            o.sourcePos = sourcePos;
+            return o;
         }
     }
 }

@@ -9,17 +9,30 @@ namespace NelaSystem.ChipLisp {
         public char head { get; private set; }
         public bool isEnd { get; private set; } = false;
         private TextReader reader;
+        private int sourceLinePos;
+        private int sourceCharPos = -1;
 
         public Lexer(VM vm, TextReader reader) {
             this.vm = vm;
             this.reader = reader;
-            ReadNext();
+            NextChar();
         }
 
-        public Obj Read() {
+        public (int, int) GetCurrentSourcePos() {
+            return (sourceLinePos, sourceCharPos);
+        }
+
+        public Obj ReadObj() {
+            var p = (sourceLinePos, sourceCharPos);
+            var o = Read();
+            o.sourcePos = p;
+            return o;
+        }
+
+        private Obj Read() {
             if (head == '-') {
                 if (reader.PeekChar(out var ch)&& char.IsDigit(ch)) {
-                    ReadNext();
+                    NextChar();
                     return ReadNumber(true);
                 }
             }
@@ -32,10 +45,13 @@ namespace NelaSystem.ChipLisp {
             throw new InvalidDataException($"Don't know how to handle {head}");
         }
 
-        public bool ReadNext() {
+        public bool NextChar() {
             var ret = reader.ReadChar(out var c);
             head = c;
             if (!ret) isEnd = true;
+            else {
+                sourceCharPos++;
+            }
             return ret;
         }
 
@@ -44,21 +60,28 @@ namespace NelaSystem.ChipLisp {
                 isEnd = true;
                 return;
             }
-            ReadNext();
+            OnNextLine();
+            NextChar();
+        }
+
+        public void OnNextLine() {
+            sourceLinePos++;
+            sourceCharPos = 0;
         }
 
         public T ReadAs<T>(T o) where T : Obj {
-            ReadNext();
+            o.sourcePos = (sourceLinePos, sourceCharPos);
+            NextChar();
             return o;
         }
 
         private Obj ReadNumber(bool negative = false) {
             int val = head - '0';
-            while (ReadNext()) {
+            while (NextChar()) {
                 if (char.IsDigit(head)) {
                     val = val * 10 + (head - '0');
                 } else if (head == '.') {
-                    ReadNext();
+                    NextChar();
                     var fVal = val + ReadDecimal();
                     if (negative) fVal = -fVal;
                     return new NativeObj<float>(fVal);
@@ -77,7 +100,7 @@ namespace NelaSystem.ChipLisp {
             do {
                 val += head - '0';
                 val /= 10;
-            } while (ReadNext() && char.IsDigit(head));
+            } while (NextChar() && char.IsDigit(head));
 
             return val;
         }
@@ -85,7 +108,7 @@ namespace NelaSystem.ChipLisp {
         private SymObj ReadSymbol() {
             var str = new StringBuilder();
             str.Append(head);
-            while (ReadNext()) {
+            while (NextChar()) {
                 if (!(char.IsLetterOrDigit(head) || symbolChars.IndexOf(head) != -1)) break;
                 str.Append(head);
             }
