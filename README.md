@@ -40,7 +40,7 @@ Define a recursive function which takes a variable number of numbers:
 10
 ```
 
-Define a recursive macro is more complex:
+Define a recursive macro, which is more complex:
 ```lisp
 (defmacro plus-all args
     (if (cdr args)
