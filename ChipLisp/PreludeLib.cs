@@ -4,6 +4,7 @@ namespace NelaSystem.ChipLisp {
             state.AddFunction("cons", Prim_Cons);
             state.AddFunction("car", Prim_Car);
             state.AddFunction("cdr", Prim_Cdr);
+            state.AddPrimitive("list", Prim_List);
             state.AddFunction("+", Prim_Plus);
             state.AddFunction("-", Prim_Minus);
             state.AddFunction("<", Prim_Lt);
@@ -32,6 +33,12 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj Prim_Cdr(VM vm, Env env, Obj args) {
             return vm.Expect<CellObj>(vm.ExpectList1(args)).cdr;
+        }
+
+        // (defun list args args)
+        private static Obj Prim_List(VM vm, Env env, Obj list) {
+            var args = vm.EvalListExt(env, list);
+            return args;
         }
 
         private static Obj Prim_Plus(VM vm, Env env, Obj args) {
