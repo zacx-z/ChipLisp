@@ -2,7 +2,7 @@ using System;
 
 namespace NelaSystem.ChipLisp {
     public class InterpreterException : Exception {
-        public Exception inner { get; private set; }
+        public Exception inner { get; }
 
         public InterpreterException(Obj expr, Exception inner)
             : base($"Exception thrown while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{inner.Message}\n{inner.StackTrace}") {
@@ -31,7 +31,7 @@ namespace NelaSystem.ChipLisp {
     }
 
     public class InvalidCallException : Exception {
-        public Obj obj { get; private set; }
+        public Obj obj { get; }
 
         public InvalidCallException(Obj obj) {
             this.obj = obj;
@@ -39,7 +39,7 @@ namespace NelaSystem.ChipLisp {
     }
 
     public class NotListException : Exception {
-        public Obj obj { get; private set; }
+        public Obj obj { get; }
 
         public NotListException(Obj obj) {
             this.obj = obj;

@@ -18,6 +18,8 @@ namespace NelaSystem.ChipLisp {
         }
 
         public Obj Eval(Env env, Obj obj) {
+            if (obj == null) return null;
+
             try {
                 switch (obj) {
                     case NativeObj oNt:
@@ -47,7 +49,7 @@ namespace NelaSystem.ChipLisp {
                 throw new InterpreterException(obj, e);
             }
 
-            throw new InvalidDataException($"Eval: Unknown type: {obj}");
+            throw new InvalidDataException($"Bug: Eval: Unknown type: {obj}");
         }
 
         public bool MacroExpand(Env env, Obj obj, out Obj expanded) {

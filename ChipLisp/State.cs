@@ -5,7 +5,7 @@ namespace NelaSystem.ChipLisp {
     public class State {
         public delegate void LibLoader(State state);
 
-        public VM vm { get; private set; }
+        public VM vm { get; }
         private Env env;
 
         public State(VM vm = null) {

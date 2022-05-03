@@ -1,5 +1,3 @@
-using System;
-
 namespace NelaSystem.ChipLisp {
     public class PreludeLib {
         public static void Load(State state) {
