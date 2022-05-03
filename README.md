@@ -36,6 +36,8 @@ In this way, you may write lisp code in `dslDefinitionLib` to create necessary d
 
 There are two reserved symbols: `t` and `quote`. They are not supposed to be redefined.
 
+ChipLisp treats `[` `{` the same as `(`, and `]` `}` the same as `)`.
+
 Prelude lib provides:
 ```lisp
 cons
@@ -57,8 +59,27 @@ if
 while
 let
 ```
+You may refers to [minilisp](https://github.com/rui314/minilisp) for their usages.
 
-In ChipLisp, when calling functions, if the last cell of the arguments is not ended by `nil`, the ending element will be evaluated and the result will be spliced into the result, like `,@` in Common Lisp. It will repeat evaluating the ending element of the returned result until not getting a cell value or reaching `nil`. It is useful to apply rest arguments to functions with varied-length parameters.
+### Let
+
+Syntax:
+`(let ([<var> <val>] ...) <body> ...)`
+
+Similar to `let` in Racket, it binds local variable and run `<body>` with them.
+
+Example:
+```lisp
+(let ([x 1]
+      [y 2])
+     (+ x y))
+```
+
+## Advanced Topics
+
+On function calls, if the last cell of the arguments is not ended by `nil`, the ending element will be evaluated and the result will be spliced into the result, like `,@` in Common Lisp. It will repeat evaluating the ending element of the returned result until getting a value other than a cell value.
+
+This feature is useful to apply rest arguments to functions with varied-length parameters.
 
 Define a recursive function which takes a variable number of numbers:
 ```lisp
