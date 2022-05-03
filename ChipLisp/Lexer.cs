@@ -8,9 +8,9 @@ namespace NelaSystem.ChipLisp {
         private VM vm;
         public char head { get; private set; }
         public bool isEnd { get; private set; } = false;
-        private TextReader reader;
-        private int sourceLinePos;
-        private int sourceCharPos = -1;
+        public TextReader reader { get; }
+        private int sourceLinePos = 1;
+        private int sourceCharPos = 0;
 
         public Lexer(VM vm, TextReader reader) {
             this.vm = vm;
@@ -34,9 +34,16 @@ namespace NelaSystem.ChipLisp {
             case '\"':
                 return ReadString();
             case '-':
-                if (reader.PeekChar(out var ch)&& char.IsDigit(ch)) {
+                if (reader.PeekChar(out var ch) && char.IsDigit(ch)) {
                     NextChar();
                     return ReadNumber(true);
+                }
+
+                break;
+            case '.':
+                if (reader.PeekChar(out var c) && char.IsDigit(c)) {
+                    NextChar();
+                    return new NativeObj<float>(ReadDecimal());
                 }
 
                 break;

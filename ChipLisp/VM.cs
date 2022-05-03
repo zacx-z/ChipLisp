@@ -96,7 +96,9 @@ namespace NelaSystem.ChipLisp {
                 case '}':
                     return lexer.ReadAs(CparenObj.cparen);
                 case '.':
-                    return lexer.ReadAs(DotObj.dot);
+                    if (!lexer.reader.PeekChar(out var ch) || !char.IsDigit(ch))
+                        return lexer.ReadAs(DotObj.dot);
+                    goto default;
                 case '\'':
                     return ReadQuote(lexer);
                 default:

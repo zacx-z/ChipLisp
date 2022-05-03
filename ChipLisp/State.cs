@@ -8,7 +8,7 @@ namespace NelaSystem.ChipLisp {
 
         public VM vm { get; }
         public Env env { get; private set; }
-        private Stack<Env> envStack;
+        private Stack<Env> envStack = new Stack<Env>();
 
         public State(VM vm = null) {
             this.vm = vm ?? VM.vm;
