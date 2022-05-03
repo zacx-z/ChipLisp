@@ -15,8 +15,9 @@ namespace NelaSystem.ChipLisp {
                 return Obj.nil;
             });
             var reader = new StreamReader("./main.lisp");
+            var lexer = new Lexer(VM.vm, reader);
             while (!reader.EndOfStream) {
-                state.Eval(reader);
+                state.Eval(lexer);
             }
         }
     }
