@@ -1,12 +1,40 @@
 # ChipLisp
 ChipLisp is a lightweight lisp interpreter written in C# primarily designed for interop usage.
-ChipLisp is aimed for minimal implementation and flexiblity to be interacted from C# side. It runs a subset of traditional lisp code with a few modifications.
+
+ChipLisp is aimed for minimal implementation and flexibility to be interacted from C# side. It runs a subset of traditional lisp code with a few modifications.
 Adopting Lua's philosophy, it reserves total control for C# code to make it easy to create lisp sandboxes only exposing what you need. With the powerful macro syntax, it won't be hard to create a DSL with some customization.
 
-ChipLisp's implementation refers to [minilisp](https://github.com/rui314/minilisp).
+ChipLisp is implemented referring to [minilisp](https://github.com/rui314/minilisp), but adds complete error reporting.
 
+## Run Interpreter
 
-## Language
+ChipLisp's API is similar to Lua's. To run lisp code, create a `State` and selectively load library.
+
+```c#
+var state = new State();
+state.LoadPreludeLib();
+Console.WriteLine(state.Eval("(+ 1 2)"));
+```
+
+`state.Eval()` also accepts `TextReader` as input.
+
+Scope is managed by `Env`. `state.PushEnv()` adds a local scope on the stack, which all subsequent operations run in. Call `state.PopEnv()` to leave the local scope.
+
+If you want to create a DSL and restrict its access:
+
+```c#
+state.LoadPreludeLib();
+state.PushEnv();
+state.Eval(dslDefinitionLib);
+state.PushEnv(Env.FromMapping(state.env.vars));
+state.Eval(dslCode);
+```
+
+In this way, you may write lisp code in `dslDefinitionLib` to create necessary definitions for the DSL. Because `Env.FromMapping()` only copies variable definitions, prelude library is being precluded when `dslCode` is running.
+
+## Lisp Language
+
+There are two reserved symbols: `t` and `quote`. They are not supposed to be redefined.
 
 Prelude lib provides:
 ```lisp
@@ -40,7 +68,7 @@ Define a recursive function which takes a variable number of numbers:
 10
 ```
 
-Define a recursive macro, which is more complex:
+Define a similar recursive macro, which is more complex:
 ```lisp
 (defmacro plus-all args
     (if (cdr args)

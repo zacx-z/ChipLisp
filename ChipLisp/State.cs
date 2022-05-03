@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace NelaSystem.ChipLisp {
@@ -6,11 +7,12 @@ namespace NelaSystem.ChipLisp {
         public delegate void LibLoader(State state);
 
         public VM vm { get; }
-        private Env env;
+        public Env env { get; private set; }
+        private Stack<Env> envStack;
 
         public State(VM vm = null) {
             this.vm = vm ?? VM.vm;
-            env = new Env(null, null);
+            envStack.Push(env = new Env(null, null));
             LoadLib(CoreLib.Load);
         }
 
@@ -19,16 +21,21 @@ namespace NelaSystem.ChipLisp {
         public Obj Eval(Obj expr) => VM.vm.Eval(env, expr);
 
         public void PushEnv() {
-            env = new Env(null, env);
+            envStack.Push(env = new Env(null, env));
         }
 
-        public void PopEnv() {
-            if (env.up != null) {
-                env = env.up;
+        public void PushEnv(Env env) {
+            envStack.Push(this.env = env);
+        }
+
+        public Env PopEnv() {
+            if (envStack.Count > 1) {
+                var ret = envStack.Pop();
+                env = envStack.Peek();
+                return ret;
             }
-            else {
-                throw new Exception("Already in the top env!");
-            }
+
+            throw new Exception("Already in the top env!");
         }
 
         public void LoadPreludeLib() {
