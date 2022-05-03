@@ -19,6 +19,7 @@ namespace NelaSystem.ChipLisp {
             state.AddPrimitive("macroexpand", Prim_MacroExpand);
             state.AddPrimitive("if", Prim_If);
             state.AddPrimitive("while", Prim_While);
+            state.AddPrimitive("let", Prim_Let);
         }
 
         private static Obj Prim_Cons(VM vm, Env env, Obj args) {
@@ -195,10 +196,25 @@ namespace NelaSystem.ChipLisp {
             var cond = cell.car;
             var body = vm.Expect<CellObj>(cell.cdr);
             while (vm.Eval(env, cond) != Obj.nil) {
-                var exprs = cell.cdr;
-                vm.EvalList(env, exprs);
+                vm.EvalList(env, body);
             }
             return Obj.nil;
+        }
+
+        // (let ([x 10]) (+ x 10))
+        private static Obj Prim_Let(VM vm, Env env, Obj list) {
+            var cell = vm.Expect<CellObj>(list);
+            var newEnv = new Env(null, env);
+            var valExprs = cell.car;
+            var valEnumerator = valExprs.GetListEnumerator();
+            while (valEnumerator.GetNext(out var valExpr)) {
+                var (symObj, val) = vm.ExpectList2(valExpr);
+                var sym = vm.Expect<SymObj>(symObj);
+                newEnv.AddVariable(sym, vm.Eval(newEnv, val));
+            }
+
+            var body = vm.Expect<CellObj>(cell.cdr);
+            return vm.Progn(newEnv, body);
         }
 
         private static Obj HandleFunction<T>(VM vm, Env env, Obj list) where T : FuncObj, new() {
