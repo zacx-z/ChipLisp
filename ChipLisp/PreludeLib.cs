@@ -207,10 +207,14 @@ namespace NelaSystem.ChipLisp {
                 return null;
             }
 
-            var argEnum = cell.car.GetListEnumerator();
-            while (argEnum.GetNext(out var arg)) {
-                if (!(arg is SymObj))
+            Obj p = cell.car;
+            for (; p is CellObj c; p = c.cdr) {
+                if (!(c.car is SymObj))
                     vm.Error("parameter must be a symbol");
+            }
+
+            if (p != Obj.nil && !(p is SymObj)) {
+                vm.Error("parameter must be a symbol");
             }
 
             return new T() {

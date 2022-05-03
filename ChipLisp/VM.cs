@@ -86,8 +86,12 @@ namespace NelaSystem.ChipLisp {
                     lexer.SkipLine();
                     break;
                 case '(':
+                case '[':
+                case '{':
                     return ReadList(lexer);
                 case ')':
+                case ']':
+                case '}':
                     return lexer.ReadAs(CparenObj.cparen);
                 case '.':
                     return lexer.ReadAs(DotObj.dot);
@@ -106,7 +110,7 @@ namespace NelaSystem.ChipLisp {
                 }
                 catch (NotListException e) {
                     if (e.obj == args) {
-                        throw new ArgumentException("arguments must be a list");
+                        throw new ArgumentException($"arguments must be a list but got {args}");
                     }
 
                     throw;
@@ -119,10 +123,10 @@ namespace NelaSystem.ChipLisp {
             if (fn is FuncObj func) {
                 Obj argValues;
                 try {
-                    argValues = EvalList(env, args);
+                    argValues = EvalListExt(env, args);
                 }
                 catch (NotListException) {
-                    throw new ArgumentException("arguments must be a list");
+                    throw new ArgumentException($"arguments must be a list but got {args}");
                 }
                 return ApplyFunc(env, func, argValues);
             }
@@ -144,6 +148,24 @@ namespace NelaSystem.ChipLisp {
                 var expr = cell.car;
                 var res = Eval(env, expr);
                 head = Cons(res, head);
+            }
+
+            if (lp != Obj.nil) throw new NotListException(list);
+
+            return Reverse(head);
+        }
+
+        /// list could be in the form of (a . b). It will evaluates b and expand it, and repeat until getting a list.
+        /// useful for applying rest parameters, e.g. (defun f (a . b) (if b (+ a (f . b)) a))
+        public Obj EvalListExt(Env env, Obj list) {
+            Obj head = Obj.nil;
+            var lp = list;
+            while (lp is CellObj || (lp = Eval(env, lp)) is CellObj) {
+                var cell = lp as CellObj;
+                var expr = cell.car;
+                var res = Eval(env, expr);
+                head = Cons(res, head);
+                lp = cell.cdr;
             }
 
             if (lp != Obj.nil) throw new NotListException(list);

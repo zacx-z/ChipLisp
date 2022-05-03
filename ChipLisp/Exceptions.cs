@@ -5,7 +5,7 @@ namespace NelaSystem.ChipLisp {
         public Exception inner { get; private set; }
 
         public InterpreterException(Obj expr, Exception inner)
-            : base($"Exception thrown while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{inner.Message}") {
+            : base($"Exception thrown while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{inner.Message}\n{inner.StackTrace}") {
             this.inner = inner;
         }
     }
