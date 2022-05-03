@@ -49,7 +49,7 @@ namespace NelaSystem.ChipLisp {
                 throw new InterpreterException(obj, e);
             }
 
-            throw new InvalidDataException($"Bug: Eval: Unknown type: {obj}");
+            throw new InvalidDataException($"Eval: Unknown type: {obj} at {obj.sourcePos.Item1}:{obj.sourcePos.Item2}");
         }
 
         public bool MacroExpand(Env env, Obj obj, out Obj expanded) {
@@ -194,6 +194,10 @@ namespace NelaSystem.ChipLisp {
                 var sym = cvars.car;
                 var val = cvals.car;
                 map.Add(new CellObj(sym, val));
+            }
+
+            if (vars is CellObj) {
+                throw new ArgumentNumberMismatchException(vars, vals);
             }
 
             if (vars != Obj.nil) {

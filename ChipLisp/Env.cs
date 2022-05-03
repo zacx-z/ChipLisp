@@ -18,7 +18,7 @@ namespace NelaSystem.ChipLisp {
                 }
             }
 
-            return null;
+            throw new SymbolNotFoundException(sym, this);
         }
 
         public void AddVariable(SymObj sym, Obj val) {

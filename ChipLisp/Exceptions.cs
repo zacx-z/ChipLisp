@@ -46,6 +46,16 @@ namespace NelaSystem.ChipLisp {
         }
     }
 
+    public class SymbolNotFoundException : Exception {
+        public SymbolNotFoundException(SymObj sym, Env env)
+            : base ($"Symbol '{sym}' not found") {}
+    }
+
+    public class ArgumentNumberMismatchException : Exception {
+        public ArgumentNumberMismatchException(Obj vars, Obj vals)
+            : base ($"Argument number mismatches. Expected {vars} but got {vals}") {}
+    }
+
     public class PrimitiveRuntimeException : Exception {
         public PrimitiveRuntimeException(Obj p, string message)
             : base($"Error when running primitive function: {p}\nMessage: {message}") {}
