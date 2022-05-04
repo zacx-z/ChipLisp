@@ -1,4 +1,4 @@
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public static class CoreLib {
         public static void Load(State state) {
             state.AddVariable("t", TrueObj.t);

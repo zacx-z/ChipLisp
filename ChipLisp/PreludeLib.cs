@@ -1,4 +1,4 @@
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public class PreludeLib {
         public static void Load(State state) {
             state.AddFunction("cons", Prim_Cons);

@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public static class Extensions {
         public static int GetListLength(this Obj self) {
             int len = 0;

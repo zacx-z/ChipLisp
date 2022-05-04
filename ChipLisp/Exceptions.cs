@@ -1,6 +1,6 @@
 using System;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public class InterpreterException : Exception {
         public Exception inner { get; }
 

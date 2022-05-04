@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public class State {
         public delegate void LibLoader(State state);
 

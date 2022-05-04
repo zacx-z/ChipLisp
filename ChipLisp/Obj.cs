@@ -1,7 +1,7 @@
 using System;
 using System.IO;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
 
     public abstract class Obj {
         public static NilObj nil = new NilObj();

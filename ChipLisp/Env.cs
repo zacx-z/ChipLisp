@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public class Env {
         public List<CellObj> vars { get; }
         public Env up { get; }

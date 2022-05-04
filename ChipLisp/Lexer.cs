@@ -1,7 +1,7 @@
 using System.Text;
 using System.IO;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public class Lexer {
         private const string symbolChars = "~!@#$%^&*-_=+:/?<>";
 

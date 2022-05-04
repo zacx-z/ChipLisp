@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 
-namespace NelaSystem.ChipLisp {
+namespace Nela.ChipLisp {
     public class VM {
         public static VM vm = new VM();
 

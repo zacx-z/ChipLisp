@@ -7,7 +7,7 @@
         <ProjectGuid>{08FF1A13-D4A2-4619-A3BA-4CAC9A181E3B}</ProjectGuid>
         <OutputType>Exe</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>NelaSystem.ChipLisp.CommandLine</RootNamespace>
+        <RootNamespace>Nela.ChipLisp.CommandLine</RootNamespace>
         <AssemblyName>ichiplisp</AssemblyName>
         <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>

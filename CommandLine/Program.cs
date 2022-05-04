@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
 
-namespace NelaSystem.ChipLisp.CommandLine {
+namespace Nela.ChipLisp.CommandLine {
     internal class Program {
         public static void Main(string[] args) {
             var state = new State();
