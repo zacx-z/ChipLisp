@@ -15,7 +15,6 @@ namespace NelaSystem.ChipLisp {
             return writer.ToString();
         }
     }
-    public delegate Obj PrimitiveFunc(VM vm, Env env, Obj args);
 
     public class NilObj : Obj {
         public override void Print(TextWriter writer) {
@@ -77,13 +76,15 @@ namespace NelaSystem.ChipLisp {
 
     public class PrimObj : Obj {
         public PrimitiveFunc func;
+        private string name;
 
-        public PrimObj(PrimitiveFunc func) {
+        public PrimObj(PrimitiveFunc func, string funcName = null) {
             this.func = func;
+            this.name = funcName ?? func.Method.Name;
         }
 
         public override void Print(TextWriter writer) {
-            writer.Write($"<primitive>");
+            writer.Write($"<primitive {name}>");
         }
     }
 
@@ -124,4 +125,6 @@ namespace NelaSystem.ChipLisp {
             writer.Write(")");
         }
     }
+
+    public delegate Obj PrimitiveFunc(VM vm, Env env, Obj args);
 }

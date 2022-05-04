@@ -6,7 +6,7 @@ Adopting Lua's philosophy, it reserves total control for C# code to make it easy
 
 ChipLisp is implemented referring to [minilisp](https://github.com/rui314/minilisp), but adds complete error reporting.
 
-## Run Interpreter
+## Run
 
 ChipLisp's API is similar to Lua's. To run lisp code, create a `State` and selectively load library.
 
@@ -31,6 +31,47 @@ state.Eval(dslCode);
 ```
 
 In this way, you may write lisp code in `dslDefinitionLib` to create necessary definitions for the DSL. Because `Env.FromMapping()` only copies variable definitions, prelude library is being precluded when `dslCode` is running.
+
+## Extend
+
+You can extend ChipLisp with C# functions so that you can customize it to your needs.
+
+### Add Variables
+
+```c#
+state.AddVariable("my-int", new NativeObj<int>(100));
+```
+
+You can use any type in C# with `NativeObj<T>` and pass it to your custom functions.
+
+### Add Functions
+
+The low-level and powerful way is to use `state.AddVariable` and `PrimObj`.
+
+```c#
+state.AddVariable("my-fun", new PrimObj(MyFunc));
+
+...
+
+Obj MyFunc(VM vm, Env env, Obj list) {
+    vm.EvalListExt(env, list);
+    // do your work
+    ...
+}
+```
+
+`env`: the scope information of the function implemented.
+`list`: the rest elements when being called.
+
+Implement the function with the help of `VM` class and `Utils.cs`.
+
+ChipLisp also provides two helper functions to define C# functions:
+
+ - `state.AddFunction(name, func)`
+ - `state.AddMacro(name, macrofunc)`
+
+To learn more, one way is to read the functions implemented Prelude.cs.
+
 
 ## Lisp Language
 
