@@ -1,3 +1,4 @@
+using System;
 using System.IO;
 
 namespace NelaSystem.ChipLisp {
@@ -21,10 +22,15 @@ namespace NelaSystem.ChipLisp {
             writer.Write("()");
         }
     }
-    
+
     public abstract class ValueObj : Obj {}
 
-    public class ValueObj<T> : ValueObj {
+    public interface IValueObj<out T> {
+        T value { get; }
+    }
+
+    public class ValueObj<T> : ValueObj, IValueObj<T> {
+        T IValueObj<T>.value => value;
         public T value;
 
         public ValueObj(T value) {

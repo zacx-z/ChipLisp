@@ -32,6 +32,15 @@ namespace NelaSystem.ChipLisp {
             return null;
         }
 
+        public static T ExpectValue<T>(this VM vm, Obj obj) {
+            if (obj is IValueObj<T> v) {
+                return v.value;
+            }
+
+            vm.Error($"Expected type assignable to {typeof(T).Name} but got {obj}");
+            return default(T);
+        }
+
         public static Obj ExpectOr(this VM vm, Obj obj, params Expect.ConditionBranch[] group) {
             foreach (var g in group) {
                 var ret = g.processor(obj);
@@ -128,21 +137,21 @@ namespace NelaSystem.ChipLisp {
 
         public static void AddCSharpFunction<T1>(this State state, string sym, Action<T1> func) {
             state.AddFunction(sym, (vm, env, args) => {
-                func(vm.Expect<ValueObj<T1>>(vm.ExpectList1(args)).value);
+                func(vm.ExpectValue<T1>(vm.ExpectList1(args)));
                 return Obj.nil;
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, TR>(this State state, string sym, Func<T1, TR> func) {
             state.AddFunction(sym, (vm, env, args) => new ValueObj<TR>(
-                func(vm.Expect<ValueObj<T1>>(vm.ExpectList1(args)).value)
+                func(vm.ExpectValue<T1>(vm.ExpectList1(args)))
             ), func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2>(this State state, string sym, Action<T1, T2> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2) = vm.ExpectList2(args);
-                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value);
+                func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2));
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -150,14 +159,14 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, TR>(this State state, string sym, Func<T1, T2, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2) = vm.ExpectList2(args);
-                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value));
+                return new ValueObj<TR>(func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2)));
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2, T3>(this State state, string sym, Action<T1, T2, T3> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3) = vm.ExpectList3(args);
-                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value);
+                func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2), vm.ExpectValue<T3>(a3));
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -165,14 +174,14 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, T3, TR>(this State state, string sym, Func<T1, T2, T3, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3) = vm.ExpectList3(args);
-                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value));
+                return new ValueObj<TR>(func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2), vm.ExpectValue<T3>(a3)));
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2, T3, T4>(this State state, string sym, Action<T1, T2, T3, T4> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4) = vm.ExpectList4(args);
-                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value);
+                func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2), vm.ExpectValue<T3>(a3), vm.ExpectValue<T4>(a4));
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -180,14 +189,14 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, T3, T4, TR>(this State state, string sym, Func<T1, T2, T3, T4, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4) = vm.ExpectList4(args);
-                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value));
+                return new ValueObj<TR>(func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2), vm.ExpectValue<T3>(a3), vm.ExpectValue<T4>(a4)));
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2, T3, T4, T5>(this State state, string sym, Action<T1, T2, T3, T4, T5> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4, a5) = vm.ExpectList5(args);
-                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value, vm.Expect<ValueObj<T5>>(a5).value);
+                func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2), vm.ExpectValue<T3>(a3), vm.ExpectValue<T4>(a4), vm.ExpectValue<T5>(a5));
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -195,7 +204,7 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, T3, T4, T5, TR>(this State state, string sym, Func<T1, T2, T3, T4, T5, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4, a5) = vm.ExpectList5(args);
-                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value, vm.Expect<ValueObj<T5>>(a5).value));
+                return new ValueObj<TR>(func(vm.ExpectValue<T1>(a1), vm.ExpectValue<T2>(a2), vm.ExpectValue<T3>(a3), vm.ExpectValue<T4>(a4), vm.ExpectValue<T5>(a5)));
             }, func.Method.Name);
         }
 
