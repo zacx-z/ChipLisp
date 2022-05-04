@@ -8,7 +8,7 @@ ChipLisp is implemented referring to [minilisp](https://github.com/rui314/minili
 
 ## Run
 
-ChipLisp's API is similar to Lua's. To run lisp code, create a `State` and selectively load library.
+ChipLisp's API is similar to Lua's. To run lisp code, create a `State` and selectively load libraries.
 
 ```c#
 var state = new State();
@@ -18,7 +18,7 @@ Console.WriteLine(state.Eval("(+ 1 2)"));
 
 `state.Eval()` also accepts `TextReader` as input.
 
-Scope is managed by `Env`. `state.PushEnv()` adds a local scope on the stack, which all subsequent operations run in. Call `state.PopEnv()` to leave the local scope.
+Scopes are managed by `Env`. `state.PushEnv()` adds a local scope on the stack, which all subsequent operations run in. Call `state.PopEnv()` to leave the local scope.
 
 If you want to create a DSL and restrict its access:
 
@@ -46,6 +46,8 @@ You can use any type in C# with `NativeObj<T>` and pass it to your custom functi
 
 ### Add Functions
 
+#### The Low-Level Way
+
 The low-level and powerful way is to use `state.AddVariable` and `PrimObj`.
 
 ```c#
@@ -72,6 +74,16 @@ ChipLisp also provides two helper functions to define C# functions:
 
 To learn more, one way is to read the functions implemented Prelude.cs.
 
+#### The High-Level Way
+
+ChipLisp provides helper functions to fast export C# functions with ease. It automatically converts the arguments and return values for each side.
+
+Signature: `state.AddCSharpFunction<T1, T2 ...>(name, csharpfunc)`
+
+For example:
+```c#
+state.AddCSharpFunction<float, float>("exp", Math.Abs);
+```
 
 ## Lisp Language
 

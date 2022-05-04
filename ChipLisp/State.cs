@@ -55,6 +55,10 @@ namespace NelaSystem.ChipLisp {
             env.AddVariable(vm.Intern(sym), new PrimObj((vm, env, list) => func(vm, env, vm.EvalListExt(env, list)), func.Method.Name));
         }
 
+        public void AddFunction(string sym, PrimitiveFunc func, string funcName) {
+            env.AddVariable(vm.Intern(sym), new PrimObj((vm, env, list) => func(vm, env, vm.EvalListExt(env, list)), funcName));
+        }
+
         public void AddPrimitive(string sym, PrimitiveFunc func) {
             env.AddVariable(vm.Intern(sym), new PrimObj(func));
         }
