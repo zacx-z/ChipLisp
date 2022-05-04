@@ -49,7 +49,7 @@ namespace NelaSystem.ChipLisp {
                 throw new InterpreterException(obj, e);
             }
 
-            throw new InvalidDataException($"Eval: Unknown type: {obj} at {obj.sourcePos.Item1}:{obj.sourcePos.Item2}");
+            throw new InterpreterException(obj, new InvalidObjException(obj));
         }
 
         public bool MacroExpand(Env env, Obj obj, out Obj expanded) {

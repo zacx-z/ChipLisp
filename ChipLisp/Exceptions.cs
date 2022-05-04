@@ -38,6 +38,12 @@ namespace NelaSystem.ChipLisp {
         }
     }
 
+    public class InvalidObjException : Exception {
+        public InvalidObjException(Obj obj)
+            : base($"Unknown type: {obj} at {obj.sourcePos.Item1}:{obj.sourcePos.Item2}") {
+        }
+    }
+
     public class NotListException : Exception {
         public Obj obj { get; }
 
