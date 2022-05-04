@@ -1,5 +1,6 @@
 using System.Text;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace Nela.ChipLisp {
     public class Lexer {
@@ -126,13 +127,19 @@ namespace Nela.ChipLisp {
 
         private ValueObj<string> ReadString() {
             var str = new StringBuilder();
-            while (NextChar() && head != '\"') {
+            bool escaping = false;
+            while (NextChar() && (head != '\"' || escaping)) {
                 str.Append(head);
+                if (!escaping && head == '\\') {
+                    escaping = true;
+                } else {
+                    escaping = false;
+                }
             }
 
             if (head == '\"') {
                 NextChar();
-                return new ValueObj<string>(str.ToString());
+                return new ValueObj<string>(Regex.Unescape(str.ToString()));
             }
 
             throw new LexerException(this, "Unexpected end of file.");
