@@ -39,10 +39,10 @@ You can extend ChipLisp with C# functions so that you can customize it to your n
 ### Add Variables
 
 ```c#
-state.AddVariable("my-int", new NativeObj<int>(100));
+state.AddVariable("my-int", new ValueObj<int>(100));
 ```
 
-You can use any type in C# with `NativeObj<T>` and pass it to your custom functions.
+You can use any type in C# with `ValueObj<T>` and pass it to your custom functions.
 
 ### Add Functions
 

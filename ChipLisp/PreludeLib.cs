@@ -51,24 +51,24 @@ namespace NelaSystem.ChipLisp {
                 return vm.Error("no arguments");
             }
 
-            if (first is NativeObj<int> it) {
+            if (first is ValueObj<int> it) {
                 int sum = it.value;
 
                 while (enumerator.GetNext(out var arg)) {
-                    sum += vm.Expect<NativeObj<int>>(arg).value;
+                    sum += vm.Expect<ValueObj<int>>(arg).value;
                 }
 
-                return new NativeObj<int>(sum);
+                return new ValueObj<int>(sum);
             }
 
-            if (first is NativeObj<float> fl) {
+            if (first is ValueObj<float> fl) {
                 float sum = fl.value;
 
                 while (enumerator.GetNext(out var arg)) {
-                    sum += vm.Expect<NativeObj<float>>(arg).value;
+                    sum += vm.Expect<ValueObj<float>>(arg).value;
                 }
 
-                return new NativeObj<float>(sum);
+                return new ValueObj<float>(sum);
             }
 
             return vm.Error("+ takes only numbers");
@@ -80,28 +80,28 @@ namespace NelaSystem.ChipLisp {
                 return vm.Error("no arguments");
             }
 
-            if (first is NativeObj<int> it) {
+            if (first is ValueObj<int> it) {
                 int ret = it.value;
                 int l = 1;
 
                 while (enumerator.GetNext(out var arg)) {
-                    ret -= vm.Expect<NativeObj<int>>(arg).value;
+                    ret -= vm.Expect<ValueObj<int>>(arg).value;
                     l++;
                 }
 
-                return new NativeObj<int>(l == 1 ? -ret : ret);
+                return new ValueObj<int>(l == 1 ? -ret : ret);
             }
 
-            if (first is NativeObj<float> fl) {
+            if (first is ValueObj<float> fl) {
                 float ret = fl.value;
                 int l = 1;
 
                 while (enumerator.GetNext(out var arg)) {
-                    ret -= vm.Expect<NativeObj<float>>(arg).value;
+                    ret -= vm.Expect<ValueObj<float>>(arg).value;
                     l++;
                 }
 
-                return new NativeObj<float>(l == 1 ? -ret : ret);
+                return new ValueObj<float>(l == 1 ? -ret : ret);
             }
 
             return vm.Error("- takes only numbers");
@@ -113,24 +113,24 @@ namespace NelaSystem.ChipLisp {
                 return vm.Error("no arguments");
             }
 
-            if (first is NativeObj<int> it) {
+            if (first is ValueObj<int> it) {
                 int product = it.value;
 
                 while (enumerator.GetNext(out var arg)) {
-                    product *= vm.Expect<NativeObj<int>>(arg).value;
+                    product *= vm.Expect<ValueObj<int>>(arg).value;
                 }
 
-                return new NativeObj<int>(product);
+                return new ValueObj<int>(product);
             }
 
-            if (first is NativeObj<float> fl) {
+            if (first is ValueObj<float> fl) {
                 float product = fl.value;
 
                 while (enumerator.GetNext(out var arg)) {
-                    product *= vm.Expect<NativeObj<float>>(arg).value;
+                    product *= vm.Expect<ValueObj<float>>(arg).value;
                 }
 
-                return new NativeObj<float>(product);
+                return new ValueObj<float>(product);
             }
 
             return vm.Error("* takes only numbers");
@@ -139,29 +139,29 @@ namespace NelaSystem.ChipLisp {
         private static Obj Prim_Divide(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
             return vm.ExpectOr(lhs
-                , Expect.On<NativeObj<float>>(f => new NativeObj<float>(f.value / vm.Expect<NativeObj<float>>(rhs).value))
-                , Expect.On<NativeObj<int>>(f => new NativeObj<int>(f.value / vm.Expect<NativeObj<int>>(rhs).value))
+                , Expect.On<ValueObj<float>>(f => new ValueObj<float>(f.value / vm.Expect<ValueObj<float>>(rhs).value))
+                , Expect.On<ValueObj<int>>(f => new ValueObj<int>(f.value / vm.Expect<ValueObj<int>>(rhs).value))
                 );
         }
 
         private static Obj Prim_ToInt(VM vm, Env env, Obj args) {
-            var f = vm.Expect<NativeObj<float>>(vm.ExpectList1(args));
-            return new NativeObj<int>((int) f.value);
+            var f = vm.Expect<ValueObj<float>>(vm.ExpectList1(args));
+            return new ValueObj<int>((int) f.value);
         }
 
         private static Obj Prim_ToFloat(VM vm, Env env, Obj args) {
-            var i = vm.Expect<NativeObj<int>>(vm.ExpectList1(args));
-            return new NativeObj<float>(i.value);
+            var i = vm.Expect<ValueObj<int>>(vm.ExpectList1(args));
+            return new ValueObj<float>(i.value);
         }
 
         private static Obj Prim_Lt(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
-            if (lhs is NativeObj<int> lhsInt) {
-                return lhsInt.value < vm.Expect<NativeObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
+            if (lhs is ValueObj<int> lhsInt) {
+                return lhsInt.value < vm.Expect<ValueObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
             }
 
-            if (lhs is NativeObj<float> lhsFloat) {
-                return lhsFloat.value < vm.Expect<NativeObj<float>>(rhs).value ? (Obj) TrueObj.t : Obj.nil;
+            if (lhs is ValueObj<float> lhsFloat) {
+                return lhsFloat.value < vm.Expect<ValueObj<float>>(rhs).value ? (Obj) TrueObj.t : Obj.nil;
             }
 
             return vm.Error("< takes only numbers");
@@ -170,7 +170,7 @@ namespace NelaSystem.ChipLisp {
         // only on integers
         private static Obj Prim_NumEq(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
-            return vm.Expect<NativeObj<int>>(lhs).value == vm.Expect<NativeObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
+            return vm.Expect<ValueObj<int>>(lhs).value == vm.Expect<ValueObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
         }
 
         private static Obj Prim_Eq(VM vm, Env env, Obj args) {

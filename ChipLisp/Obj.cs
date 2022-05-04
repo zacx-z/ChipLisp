@@ -22,12 +22,12 @@ namespace NelaSystem.ChipLisp {
         }
     }
     
-    public abstract class NativeObj : Obj {}
+    public abstract class ValueObj : Obj {}
 
-    public class NativeObj<T> : NativeObj {
+    public class ValueObj<T> : ValueObj {
         public T value;
 
-        public NativeObj(T value) {
+        public ValueObj(T value) {
             this.value = value;
         }
 

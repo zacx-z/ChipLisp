@@ -22,7 +22,7 @@ namespace NelaSystem.ChipLisp {
 
             try {
                 switch (obj) {
-                    case NativeObj oNt:
+                    case ValueObj oNt:
                     case PrimObj oPrim:
                     case FuncObj oFunc:
                     case NilObj oNil:

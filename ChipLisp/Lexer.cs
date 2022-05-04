@@ -43,7 +43,7 @@ namespace NelaSystem.ChipLisp {
             case '.':
                 if (reader.PeekChar(out var c) && char.IsDigit(c)) {
                     NextChar();
-                    return new NativeObj<float>(ReadDecimal());
+                    return new ValueObj<float>(ReadDecimal());
                 }
 
                 break;
@@ -96,7 +96,7 @@ namespace NelaSystem.ChipLisp {
                     NextChar();
                     var fVal = val + ReadDecimal();
                     if (negative) fVal = -fVal;
-                    return new NativeObj<float>(fVal);
+                    return new ValueObj<float>(fVal);
                 }
                 else break;
             }
@@ -106,7 +106,7 @@ namespace NelaSystem.ChipLisp {
 
             if (negative) val = -val;
 
-            return new NativeObj<int>(val);
+            return new ValueObj<int>(val);
         }
 
         private float ReadDecimal() {
@@ -124,7 +124,7 @@ namespace NelaSystem.ChipLisp {
             return val;
         }
 
-        private NativeObj<string> ReadString() {
+        private ValueObj<string> ReadString() {
             var str = new StringBuilder();
             while (NextChar() && head != '\"') {
                 str.Append(head);
@@ -132,7 +132,7 @@ namespace NelaSystem.ChipLisp {
 
             if (head == '\"') {
                 NextChar();
-                return new NativeObj<string>(str.ToString());
+                return new ValueObj<string>(str.ToString());
             }
 
             throw new LexerException(this, "Unexpected end of file.");

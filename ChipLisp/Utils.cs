@@ -122,27 +122,27 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<TR>(this State state, string sym, Func<TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 vm.ExpectList0(args);
-                return new NativeObj<TR>(func());
+                return new ValueObj<TR>(func());
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1>(this State state, string sym, Action<T1> func) {
             state.AddFunction(sym, (vm, env, args) => {
-                func(vm.Expect<NativeObj<T1>>(vm.ExpectList1(args)).value);
+                func(vm.Expect<ValueObj<T1>>(vm.ExpectList1(args)).value);
                 return Obj.nil;
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, TR>(this State state, string sym, Func<T1, TR> func) {
-            state.AddFunction(sym, (vm, env, args) => new NativeObj<TR>(
-                func(vm.Expect<NativeObj<T1>>(vm.ExpectList1(args)).value)
+            state.AddFunction(sym, (vm, env, args) => new ValueObj<TR>(
+                func(vm.Expect<ValueObj<T1>>(vm.ExpectList1(args)).value)
             ), func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2>(this State state, string sym, Action<T1, T2> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2) = vm.ExpectList2(args);
-                func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value);
+                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value);
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -150,14 +150,14 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, TR>(this State state, string sym, Func<T1, T2, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2) = vm.ExpectList2(args);
-                return new NativeObj<TR>(func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value));
+                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value));
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2, T3>(this State state, string sym, Action<T1, T2, T3> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3) = vm.ExpectList3(args);
-                func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value, vm.Expect<NativeObj<T3>>(a3).value);
+                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value);
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -165,14 +165,14 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, T3, TR>(this State state, string sym, Func<T1, T2, T3, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3) = vm.ExpectList3(args);
-                return new NativeObj<TR>(func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value, vm.Expect<NativeObj<T3>>(a3).value));
+                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value));
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2, T3, T4>(this State state, string sym, Action<T1, T2, T3, T4> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4) = vm.ExpectList4(args);
-                func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value, vm.Expect<NativeObj<T3>>(a3).value, vm.Expect<NativeObj<T4>>(a4).value);
+                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value);
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -180,14 +180,14 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, T3, T4, TR>(this State state, string sym, Func<T1, T2, T3, T4, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4) = vm.ExpectList4(args);
-                return new NativeObj<TR>(func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value, vm.Expect<NativeObj<T3>>(a3).value, vm.Expect<NativeObj<T4>>(a4).value));
+                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value));
             }, func.Method.Name);
         }
 
         public static void AddCSharpFunction<T1, T2, T3, T4, T5>(this State state, string sym, Action<T1, T2, T3, T4, T5> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4, a5) = vm.ExpectList5(args);
-                func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value, vm.Expect<NativeObj<T3>>(a3).value, vm.Expect<NativeObj<T4>>(a4).value, vm.Expect<NativeObj<T5>>(a5).value);
+                func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value, vm.Expect<ValueObj<T5>>(a5).value);
                 return Obj.nil;
             }, func.Method.Name);
         }
@@ -195,7 +195,7 @@ namespace NelaSystem.ChipLisp {
         public static void AddCSharpFunction<T1, T2, T3, T4, T5, TR>(this State state, string sym, Func<T1, T2, T3, T4, T5, TR> func) {
             state.AddFunction(sym, (vm, env, args) => {
                 var (a1, a2, a3, a4, a5) = vm.ExpectList5(args);
-                return new NativeObj<TR>(func(vm.Expect<NativeObj<T1>>(a1).value, vm.Expect<NativeObj<T2>>(a2).value, vm.Expect<NativeObj<T3>>(a3).value, vm.Expect<NativeObj<T4>>(a4).value, vm.Expect<NativeObj<T5>>(a5).value));
+                return new ValueObj<TR>(func(vm.Expect<ValueObj<T1>>(a1).value, vm.Expect<ValueObj<T2>>(a2).value, vm.Expect<ValueObj<T3>>(a3).value, vm.Expect<ValueObj<T4>>(a4).value, vm.Expect<ValueObj<T5>>(a5).value));
             }, func.Method.Name);
         }
 
@@ -226,7 +226,7 @@ namespace NelaSystem.ChipLisp {
         }
 
         public static string GetObjTypeName(Type t) {
-            return typeof(NativeObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name;
+            return typeof(ValueObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name;
         }
     }
 
