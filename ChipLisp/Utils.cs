@@ -1,6 +1,9 @@
+using System;
+using System.CodeDom;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace NelaSystem.ChipLisp {
     public static class Extensions {
@@ -24,8 +27,18 @@ namespace NelaSystem.ChipLisp {
                 return o;
             }
 
-            var t = typeof(T);
-            vm.Error($"Expected type of {(typeof(NativeObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name)} but got {obj}");
+            vm.Error($"Expected type of {Utils.GetObjTypeName<T>()} but got {obj}");
+            return null;
+        }
+
+        public static Obj ExpectOr(this VM vm, Obj obj, params Expect.ConditionBranch[] group) {
+            foreach (var g in group) {
+                var ret = g.processor(obj);
+                if (ret != null)
+                    return ret;
+            }
+            
+            vm.Error($"Expected type among {string.Join(", ", group.Select(g => Utils.GetObjTypeName(g.type)))} but got {obj}");
             return null;
         }
 
@@ -65,6 +78,36 @@ namespace NelaSystem.ChipLisp {
             }
             c = (char) b;
             return true;
+        }
+    }
+
+    public static class Utils {
+        public static string GetObjTypeName<T>() where T : Obj {
+            return GetObjTypeName(typeof(T));
+        }
+
+        public static string GetObjTypeName(Type t) {
+            return typeof(NativeObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name;
+        }
+    }
+
+    public static class Expect {
+        public struct ConditionBranch {
+            public delegate Obj ExpectProcessor(Obj obj);
+            public Type type;
+            public ExpectProcessor processor;
+        }
+        public static ConditionBranch On<T>(Func<T, Obj> callback) where T : Obj {
+            return new ConditionBranch() {
+                type = typeof(T),
+                processor = obj => {
+                    if (obj is T o) {
+                        return callback(o);
+                    }
+
+                    return null;
+                }
+            };
         }
     }
 

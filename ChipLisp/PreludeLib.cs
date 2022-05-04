@@ -7,6 +7,10 @@ namespace NelaSystem.ChipLisp {
             state.AddPrimitive("list", Prim_List);
             state.AddFunction("+", Prim_Plus);
             state.AddFunction("-", Prim_Minus);
+            state.AddFunction("*", Prim_Multiply);
+            state.AddFunction("/", Prim_Divide);
+            state.AddFunction("to-i", Prim_ToInt);
+            state.AddFunction("to-f", Prim_ToFloat);
             state.AddFunction("<", Prim_Lt);
             state.AddFunction("=", Prim_NumEq);
             state.AddFunction("eq", Prim_Eq);
@@ -105,6 +109,55 @@ namespace NelaSystem.ChipLisp {
 
             vm.Error("- takes only numbers");
             return null;
+        }
+
+        private static Obj Prim_Multiply(VM vm, Env env, Obj args) {
+            var enumerator = args.GetListEnumerator();
+            if (!enumerator.GetNext(out var first)) {
+                vm.Error("no arguments");
+                return null;
+            }
+
+            if (first is NativeObj<int> it) {
+                int product = it.value;
+
+                while (enumerator.GetNext(out var arg)) {
+                    product *= vm.Expect<NativeObj<int>>(arg).value;
+                }
+
+                return new NativeObj<int>(product);
+            }
+
+            if (first is NativeObj<float> fl) {
+                float product = fl.value;
+
+                while (enumerator.GetNext(out var arg)) {
+                    product *= vm.Expect<NativeObj<float>>(arg).value;
+                }
+
+                return new NativeObj<float>(product);
+            }
+
+            vm.Error("* takes only numbers");
+            return null;
+        }
+
+        private static Obj Prim_Divide(VM vm, Env env, Obj args) {
+            var (lhs, rhs) = vm.ExpectList2(args);
+            return vm.ExpectOr(lhs
+                , Expect.On<NativeObj<float>>(f => new NativeObj<float>(f.value / vm.Expect<NativeObj<float>>(rhs).value))
+                , Expect.On<NativeObj<int>>(f => new NativeObj<int>(f.value / vm.Expect<NativeObj<int>>(rhs).value))
+                );
+        }
+
+        private static Obj Prim_ToInt(VM vm, Env env, Obj args) {
+            var f = vm.Expect<NativeObj<float>>(vm.ExpectList1(args));
+            return new NativeObj<int>((int) f.value);
+        }
+
+        private static Obj Prim_ToFloat(VM vm, Env env, Obj args) {
+            var i = vm.Expect<NativeObj<int>>(vm.ExpectList1(args));
+            return new NativeObj<float>(i.value);
         }
 
         private static Obj Prim_Lt(VM vm, Env env, Obj args) {

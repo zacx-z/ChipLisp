@@ -112,9 +112,10 @@ namespace NelaSystem.ChipLisp {
         private float ReadDecimal() {
             if (!char.IsDigit(head)) return 0;
             float val = 0;
+            float m = 0.1f;
             do {
-                val += head - '0';
-                val /= 10;
+                val += (head - '0') * m;
+                m /= 10;
             } while (NextChar() && char.IsDigit(head));
 
             if (char.IsLetter(head) || symbolChars.IndexOf(head) != -1)
