@@ -48,8 +48,7 @@ namespace NelaSystem.ChipLisp {
         private static Obj Prim_Plus(VM vm, Env env, Obj args) {
             var enumerator = args.GetListEnumerator();
             if (!enumerator.GetNext(out var first)) {
-                vm.Error("no arguments");
-                return null;
+                return vm.Error("no arguments");
             }
 
             if (first is NativeObj<int> it) {
@@ -72,15 +71,13 @@ namespace NelaSystem.ChipLisp {
                 return new NativeObj<float>(sum);
             }
 
-            vm.Error("+ takes only numbers");
-            return null;
+            return vm.Error("+ takes only numbers");
         }
 
         private static Obj Prim_Minus(VM vm, Env env, Obj args) {
             var enumerator = args.GetListEnumerator();
             if (!enumerator.GetNext(out var first)) {
-                vm.Error("no arguments");
-                return null;
+                return vm.Error("no arguments");
             }
 
             if (first is NativeObj<int> it) {
@@ -107,15 +104,13 @@ namespace NelaSystem.ChipLisp {
                 return new NativeObj<float>(l == 1 ? -ret : ret);
             }
 
-            vm.Error("- takes only numbers");
-            return null;
+            return vm.Error("- takes only numbers");
         }
 
         private static Obj Prim_Multiply(VM vm, Env env, Obj args) {
             var enumerator = args.GetListEnumerator();
             if (!enumerator.GetNext(out var first)) {
-                vm.Error("no arguments");
-                return null;
+                return vm.Error("no arguments");
             }
 
             if (first is NativeObj<int> it) {
@@ -138,8 +133,7 @@ namespace NelaSystem.ChipLisp {
                 return new NativeObj<float>(product);
             }
 
-            vm.Error("* takes only numbers");
-            return null;
+            return vm.Error("* takes only numbers");
         }
 
         private static Obj Prim_Divide(VM vm, Env env, Obj args) {
@@ -170,10 +164,10 @@ namespace NelaSystem.ChipLisp {
                 return lhsFloat.value < vm.Expect<NativeObj<float>>(rhs).value ? (Obj) TrueObj.t : Obj.nil;
             }
 
-            vm.Error("< takes only numbers");
-            return null;
+            return vm.Error("< takes only numbers");
         }
 
+        // only on integers
         private static Obj Prim_NumEq(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
             return vm.Expect<NativeObj<int>>(lhs).value == vm.Expect<NativeObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
@@ -191,8 +185,7 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj Prim_Define(VM vm, Env env, Obj list) {
             if (!(list is CellObj cell && list.GetListLength() == 2 && cell.car is SymObj sym && cell.cdr is CellObj valueCell)) {
-                vm.Error("malformed define");
-                return null;
+                return vm.Error("malformed define");
             }
 
             var value = vm.Eval(env, valueCell.car);
@@ -202,8 +195,7 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj Prim_Defun(VM vm, Env env, Obj list) {
             if (!(list is CellObj cell && cell.car is SymObj sym)) {
-                vm.Error("malformed defun");
-                return null;
+                return vm.Error("malformed defun");
             }
 
             var fn = HandleFunction<FuncObj>(vm, env, cell.cdr);
@@ -213,8 +205,7 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj Prim_Defmacro(VM vm, Env env, Obj list) {
             if (!(list is CellObj cell && cell.car is SymObj sym)) {
-                vm.Error("malformed defmacro");
-                return null;
+                return vm.Error("malformed defmacro");
             }
 
             var fn = HandleFunction<MacroObj>(vm, env, cell.cdr);
@@ -232,8 +223,7 @@ namespace NelaSystem.ChipLisp {
                 vm.MacroExpand(env, body, out var ret);
                 return ret;
             }
-            vm.Error("malformed macroexpand");
-            return null;
+            return vm.Error("malformed macroexpand");
         }
 
         private static Obj Prim_If(VM vm, Env env, Obj list) {
@@ -277,18 +267,17 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj HandleFunction<T>(VM vm, Env env, Obj list) where T : FuncObj, new() {
             if (!(list is CellObj cell)) {
-                vm.Error("malformed lambda");
-                return null;
+                return vm.Error("malformed lambda");
             }
 
             Obj p = cell.car;
             for (; p is CellObj c; p = c.cdr) {
                 if (!(c.car is SymObj))
-                    vm.Error("parameter must be a symbol");
+                    return vm.Error("parameter must be a symbol");
             }
 
             if (p != Obj.nil && !(p is SymObj)) {
-                vm.Error("parameter must be a symbol");
+                return vm.Error("parameter must be a symbol");
             }
 
             return new T() {

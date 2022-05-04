@@ -87,9 +87,13 @@ cdr
 list
 +
 -
+*
+/
 <
-=
-eq
+= ; compare integers
+to-i ; convert float to int
+to-f ; convert int to float
+eq ; check two object references are the same
 eval
 define
 defun
@@ -98,7 +102,7 @@ lambda
 macroexpand
 if
 while
-let
+let ; bind local variables
 ```
 You may refers to [minilisp](https://github.com/rui314/minilisp) for their usages.
 

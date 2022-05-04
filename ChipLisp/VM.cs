@@ -226,7 +226,7 @@ namespace NelaSystem.ChipLisp {
             return new CellObj(car, cdr);
         }
 
-        public void Error(string errorMessage) {
+        public Obj Error(string errorMessage) {
             throw new RuntimeException(errorMessage);
         }
 

@@ -7,7 +7,7 @@ namespace NelaSystem.ChipLisp {
 
         private static Obj Quote(VM vm, Env env, Obj list) {
             if (list.GetListLength() != 1) {
-                vm.Error("malformed quote");
+                return vm.Error("malformed quote");
             }
             return ((CellObj)list).car;
         }
