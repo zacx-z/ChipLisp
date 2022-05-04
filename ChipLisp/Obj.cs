@@ -8,6 +8,10 @@ namespace Nela.ChipLisp {
 
         public (int, int) sourcePos = (-1, -1);
 
+        public virtual Obj OnEval(VM vm, Env env) {
+            throw new InvalidObjException(this);
+        }
+
         public abstract void Print(TextWriter writer);
 
         public override string ToString() {
@@ -18,12 +22,20 @@ namespace Nela.ChipLisp {
     }
 
     public class NilObj : Obj {
+        public override Obj OnEval(VM vm, Env env) {
+            return this;
+        }
+
         public override void Print(TextWriter writer) {
             writer.Write("()");
         }
     }
 
-    public abstract class ValueObj : Obj {}
+    public abstract class ValueObj : Obj {
+        public override Obj OnEval(VM vm, Env env) {
+            return this;
+        }
+    }
 
     public interface IValueObj<out T> {
         T value { get; }
@@ -51,6 +63,22 @@ namespace Nela.ChipLisp {
             this.cdr = cdr;
         }
 
+        public override Obj OnEval(VM vm, Env env) {
+            if (vm.MacroExpand(env, this, out var expanded)) {
+                return vm.Eval(env, expanded);
+            }
+
+            var fn = vm.Eval(env, this.car);
+            var args = this.cdr;
+
+            try {
+                return vm.Apply(env, fn, args);
+            }
+            catch (InvalidCallException) {
+                throw new Exception($"Invalid Call: {this.car} is not a function");
+            }
+        }
+
         public override void Print(TextWriter writer) {
             writer.Write("(");
             var o = this;
@@ -75,6 +103,10 @@ namespace Nela.ChipLisp {
     public class SymObj : Obj {
         public string name;
 
+        public override Obj OnEval(VM vm, Env env) {
+            return env.Find(this).cdr;
+        }
+
         public override void Print(TextWriter writer) {
             writer.Write(name);
         }
@@ -89,6 +121,10 @@ namespace Nela.ChipLisp {
             this.name = funcName ?? func.Method.Name;
         }
 
+        public override Obj OnEval(VM vm, Env env) {
+            return this;
+        }
+
         public override void Print(TextWriter writer) {
             writer.Write($"<primitive {name}>");
         }
@@ -98,6 +134,10 @@ namespace Nela.ChipLisp {
         public Obj pmtrs;
         public Obj body;
         public Env env;
+
+        public override Obj OnEval(VM vm, Env env) {
+            return this;
+        }
 
         public override void Print(TextWriter writer) {
             writer.Write("<function>");

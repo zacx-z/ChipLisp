@@ -21,35 +21,11 @@ namespace Nela.ChipLisp {
             if (obj == null) return null;
 
             try {
-                switch (obj) {
-                    case ValueObj oNt:
-                    case PrimObj oPrim:
-                    case FuncObj oFunc:
-                    case NilObj oNil:
-                        return obj;
-                    case SymObj symObj:
-                        return env.Find(symObj).cdr;
-                    case CellObj cell:
-                        if (MacroExpand(env, obj, out var expanded)) {
-                            return Eval(env, expanded);
-                        }
-
-                        var fn = Eval(env, cell.car);
-                        var args = cell.cdr;
-
-                        try {
-                            return Apply(env, fn, args);
-                        }
-                        catch (InvalidCallException) {
-                            throw new Exception($"Invalid Call: {cell.car} is not a function");
-                        }
-                }
+                return obj.OnEval(this, env);
             }
             catch (Exception e) {
                 throw new InterpreterException(obj, e);
             }
-
-            throw new InterpreterException(obj, new InvalidObjException(obj));
         }
 
         public bool MacroExpand(Env env, Obj obj, out Obj expanded) {
