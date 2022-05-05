@@ -1,12 +1,20 @@
 # ChipLisp
-ChipLisp is a lightweight lisp interpreter written in C# primarily designed for interop usage.
+ChipLisp is a lightweight lisp interpreter written in C# primarily designed for embedding usage.
 
-ChipLisp is aimed for minimal implementation and flexibility to be interacted from C# side. It runs a subset of traditional lisp code with a few modifications.
-Adopting Lua's philosophy, it reserves total control for C# code to make it easy to create lisp sandboxes only exposing what you need. With the powerful macro syntax, it won't be hard to create a DSL with some customization.
+ChipLisp is aimed for flexibility to be interacted from C# side with minimal implementation. It runs a subset of traditional lisp code with a few modifications.
+Adopting Lua's philosophy, it reserves total control from C# code to make it easy to create lisp sandboxes only exposing what you need. With the powerful macro syntax, it won't be hard to create a DSL with some customization.
 
-ChipLisp is implemented referring to [minilisp](https://github.com/rui314/minilisp), but adds complete error reporting.
+ChipLisp is implemented referring to [minilisp](https://github.com/rui314/minilisp), but adds complete error reporting behaviors.
 
-## Run
+## Getting Started
+
+1. Build the project.
+
+2. Add the reference `ChipLisp.dll` to your project, or copy `ChipLisp.dll` to your Unity project.
+
+You can also run `ichiplisp` to run lisp code interactively or in a file by `ichiplisp <filename>`.
+
+## How to Run
 
 ChipLisp's API is similar to Lua's. To run lisp code, create a `State` and selectively load libraries.
 
@@ -32,7 +40,7 @@ state.Eval(dslCode);
 
 In this way, you may write lisp code in `dslDefinitionLib` to create necessary definitions for the DSL. Because `Env.FromMapping()` only copies variable definitions, prelude library is being precluded when `dslCode` is running.
 
-## Extend
+## How to Extend
 
 You can extend ChipLisp with C# functions so that you can customize it to your needs.
 
@@ -105,7 +113,7 @@ list
 = ; compare integers
 to-i ; convert float to int
 to-f ; convert int to float
-eq ; check two object references are the same
+eq ; check if two object references are the same
 eval
 define
 defun
@@ -134,7 +142,7 @@ Example:
 
 ## Advanced Topics
 
-On function calls, if the last cell of the arguments is not ended by `nil`, the ending element will be evaluated and the result will be spliced into the result, like `,@` in Common Lisp. It will repeat evaluating the ending element of the returned result until getting a value other than a cell value.
+On function calls, if the last cell of the arguments is not ended by `nil`, the ending element will be evaluated and the result will be spliced into the argument list, like `,@` in Common Lisp. It will repeat evaluating the ending element of the returned result until getting a value other than a cell value.
 
 This feature is useful to apply rest arguments to functions with varied-length parameters.
 
@@ -157,3 +165,12 @@ Define a similar recursive macro, which is more complex:
 > (macroexpand (plus-all a b c d))
 (+ a (+ b (+ c d)))
 ```
+
+There are some cases where this gets quirky. For example:
+
+```lisp
+(define pair '(1 2))
+(+ 1 . (cdr pair))
+```
+
+It raises an error "Can't evaluate (+ 1 cdr pair)", because `(+ 1 . (cdr pair))` is expanded as `(+ . (1 . (cdr . (pair . ()))))` in which cdr is treated as a list element. To avoid this issue, you might have to bind `(cdr pair)` to a local variable.
