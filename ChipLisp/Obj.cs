@@ -164,9 +164,9 @@ namespace Nela.ChipLisp {
         }
     }
 
-    public class CparenObj : Obj {
-        public static CparenObj cparen = new CparenObj();
-        private CparenObj() {}
+    public class CParenObj : Obj {
+        public static CParenObj cParen = new CParenObj();
+        private CParenObj() {}
         public override void Print(TextWriter writer) {
             writer.Write(")");
         }
@@ -177,13 +177,15 @@ namespace Nela.ChipLisp {
     // for tail call optimization
     internal class TailCallObj : Obj {
         public Obj evalTarget;
+        public Env targetEnv;
 
-        public TailCallObj(Obj evalTarget) {
+        public TailCallObj(Obj evalTarget, Env targetEnv) {
             this.evalTarget = evalTarget;
+            this.targetEnv = targetEnv;
         }
 
         public override Obj OnEval(VM vm, Env env) {
-            return vm.EvalToTailCall(env, evalTarget);
+            return vm.EvalToTailCall(targetEnv, evalTarget);
         }
 
         public override void Print(TextWriter writer) {

@@ -85,7 +85,7 @@ namespace Nela.ChipLisp {
                 case ')':
                 case ']':
                 case '}':
-                    return lexer.ReadAs(CparenObj.cparen);
+                    return lexer.ReadAs(CParenObj.cParen);
                 case '.':
                     if (!lexer.reader.PeekChar(out var ch) || !char.IsDigit(ch))
                         return lexer.ReadAs(DotObj.dot);
@@ -177,7 +177,7 @@ namespace Nela.ChipLisp {
             }
 
             if (lp != Obj.nil) throw new NotListException(list);
-            return last != null ? (Obj)new TailCallObj(last) : Obj.nil;
+            return last != null ? (Obj)new TailCallObj(last, env) : Obj.nil;
         }
 
         public Env PushEnv(Env env, Obj vars, Obj vals) {
@@ -228,7 +228,7 @@ namespace Nela.ChipLisp {
                 var obj = ReadExpr(lexer);
                 if (obj == null)
                     throw new Exception("unclosed parenthesis");
-                if (obj == CparenObj.cparen) {
+                if (obj == CParenObj.cParen) {
                     var ret = Reverse(head);
                     ret.sourcePos = sourcePos;
                     return ret;
@@ -236,7 +236,7 @@ namespace Nela.ChipLisp {
 
                 if (obj == DotObj.dot) {
                     var last = ReadExpr(lexer);
-                    if (ReadExpr(lexer) != CparenObj.cparen)
+                    if (ReadExpr(lexer) != CParenObj.cParen)
                         throw new Exception("Closed parenthesis expected after dot");
                     var ret = Reverse(head);
                     (head as CellObj).cdr = last;
