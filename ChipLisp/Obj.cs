@@ -173,4 +173,23 @@ namespace Nela.ChipLisp {
     }
 
     public delegate Obj PrimitiveFunc(VM vm, Env env, Obj args);
+
+    // for tail call optimization
+    internal class TailCallObj : Obj {
+        public Obj evalTarget;
+
+        public TailCallObj(Obj evalTarget) {
+            this.evalTarget = evalTarget;
+        }
+
+        public override Obj OnEval(VM vm, Env env) {
+            return vm.EvalToTailCall(env, evalTarget);
+        }
+
+        public override void Print(TextWriter writer) {
+            writer.Write("<tail call:");
+            evalTarget.Print(writer);
+            writer.Write(">");
+        }
+    }
 }

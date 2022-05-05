@@ -7,6 +7,7 @@ namespace Nela.ChipLisp {
         public static VM vm = new VM();
 
         private Dictionary<string, SymObj> symbols = new Dictionary<string, SymObj>();
+        private int stackCount;
 
         public SymObj Intern(string name) {
             if (symbols.TryGetValue(name, out var ret)) {
@@ -19,7 +20,21 @@ namespace Nela.ChipLisp {
 
         public Obj Eval(Env env, Obj obj) {
             if (obj == null) return null;
+            stackCount++;
+            try {
+                var res = EvalToTailCall(env, obj);
+                while (res is TailCallObj tail) {
+                    res = tail.OnEval(this, env);
+                }
+                return res;
+            }
+            finally {
+                stackCount--;
+            }
+        }
 
+        // for tail call optimization
+        public Obj EvalToTailCall(Env env, Obj obj) {
             try {
                 return obj.OnEval(this, env);
             }
@@ -154,16 +169,15 @@ namespace Nela.ChipLisp {
         }
 
         public Obj Progn(Env env, Obj list) {
-            Obj r = Obj.nil;
-
             var lp = list;
+            Obj last = null;
             for (; lp is CellObj cell;lp = cell.cdr) {
-                r = cell.car;
-                r = Eval(env, r);
+                if (last != null) Eval(env, last);
+                last = cell.car;
             }
 
             if (lp != Obj.nil) throw new NotListException(list);
-            return r;
+            return last != null ? (Obj)new TailCallObj(last) : Obj.nil;
         }
 
         public Env PushEnv(Env env, Obj vars, Obj vals) {
