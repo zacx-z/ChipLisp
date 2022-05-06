@@ -17,7 +17,7 @@ namespace Nela.ChipLisp.CommandLine {
             if (args.Length > 0) {
                 var reader = new StreamReader(args[0]);
                 var lexer = new Lexer(VM.vm, reader);
-                while (!reader.EndOfStream) {
+                while (lexer.head != 0) {
                     state.Eval(lexer);
                 }
             }

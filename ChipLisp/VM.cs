@@ -63,8 +63,9 @@ namespace Nela.ChipLisp {
         public Obj ReadExpr(TextReader reader) => ReadExpr(new Lexer(this, reader));
 
         public Obj ReadExpr(Lexer lexer) {
-            if (lexer.isEnd) return null;
             switch (lexer.head) {
+            case '\0':
+                return null;
             case '(':
             case '[':
             case '{':

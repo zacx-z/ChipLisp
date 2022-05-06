@@ -8,8 +8,8 @@ namespace Nela.ChipLisp {
         private const string symbolChars = "~!@#$%^&*-_=+:/?<>";
 
         private VM vm;
-        public char head { get; private set; }
-        public bool isEnd { get; private set; } = false;
+        public char head => _head;
+        private char _head;
         public TextReader reader { get; }
         private int sourceLinePos = 1;
         private int sourceCharPos = 0;
@@ -61,10 +61,8 @@ namespace Nela.ChipLisp {
         }
 
         private bool NextChar() {
-            var ret = reader.ReadChar(out var c);
-            head = c;
+            var ret = reader.ReadChar(out _head);
             if (!ret) {
-                isEnd = true;
                 return false;
             }
 
@@ -79,7 +77,7 @@ namespace Nela.ChipLisp {
 
         public void Consume(char c) {
             if (c != head)
-                throw new Exception($"Expected {c} but got {head}");
+                throw new Exception($"Expected {c} but got {head}(ANSI {(int)head})");
             Next();
         }
 
@@ -104,7 +102,7 @@ namespace Nela.ChipLisp {
 
         public void SkipLine() {
             if (reader.ReadLine() == null) {
-                isEnd = true;
+                _head = '\0';
                 return;
             }
             OnNextLine();
