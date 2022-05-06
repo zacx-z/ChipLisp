@@ -8,8 +8,21 @@ namespace Nela.ChipLisp {
         private const string symbolChars = "~!@#$%^&*-_=+:/?<>";
 
         private VM vm;
-        public char head => _head;
+
+        public char head {
+            get {
+                if (headOnRequest) {
+                    if (NextChar())
+                        SkipWhiteSpacesToNext();
+                    headOnRequest = false;
+                }
+                return _head;
+            }
+        }
+
         private char _head;
+        private bool headOnRequest = false;
+
         public TextReader reader { get; }
         private int sourceLinePos = 1;
         private int sourceCharPos = 0;
@@ -70,9 +83,13 @@ namespace Nela.ChipLisp {
             return ret;
         }
 
-        public bool Next() {
-            if (!NextChar()) return false;
-            return SkipWhiteSpacesToNext();
+        // use lazy evaluation to be compatible to REPL
+        public void Next() {
+            if (headOnRequest) {
+                var _ = head;
+            }
+
+            headOnRequest = true;
         }
 
         public void Consume(char c) {
@@ -83,7 +100,7 @@ namespace Nela.ChipLisp {
 
         private bool SkipWhiteSpacesToNext() {
             while (true) {
-                switch (head) {
+                switch (_head) {
                 case '\n':
                     OnNextLine();
                     break;
@@ -91,7 +108,7 @@ namespace Nela.ChipLisp {
                     SkipLine();
                     break;
                 default:
-                    if (!char.IsWhiteSpace(head))
+                    if (!char.IsWhiteSpace(_head))
                         return true;
                     break;
                 }
@@ -111,12 +128,6 @@ namespace Nela.ChipLisp {
         public void OnNextLine() {
             sourceLinePos++;
             sourceCharPos = 0;
-        }
-
-        public T ReadAs<T>(T o) where T : Obj {
-            o.sourcePos = (sourceLinePos, sourceCharPos);
-            NextChar();
-            return o;
         }
 
         private Obj ReadNumber(bool negative = false) {
