@@ -28,6 +28,7 @@ namespace Nela.ChipLisp.CommandLine {
                     Console.Write("> ");
                     try {
                         Console.WriteLine(state.Eval(Console.In));
+                        Console.In.ReadLine();
                     }
                     catch (InterpreterException e) {
                         Console.WriteLine(e.Message);

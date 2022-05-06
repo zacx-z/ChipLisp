@@ -63,38 +63,16 @@ namespace Nela.ChipLisp {
         public Obj ReadExpr(TextReader reader) => ReadExpr(new Lexer(this, reader));
 
         public Obj ReadExpr(Lexer lexer) {
-            while (true) {
-                if (lexer.isEnd) return null;
-                switch (lexer.head) {
-                case ' ':
-                case '\r':
-                case '\t':
-                    lexer.NextChar();
-                    break;
-                case '\n':
-                    lexer.NextChar();
-                    lexer.OnNextLine();
-                    break;
-                case ';':
-                    lexer.SkipLine();
-                    break;
-                case '(':
-                case '[':
-                case '{':
-                    return ReadList(lexer);
-                case ')':
-                case ']':
-                case '}':
-                    return lexer.ReadAs(CParenObj.cParen);
-                case '.':
-                    if (!lexer.reader.PeekChar(out var ch) || !char.IsDigit(ch))
-                        return lexer.ReadAs(DotObj.dot);
-                    goto default;
-                case '\'':
-                    return ReadQuote(lexer);
-                default:
-                    return lexer.ReadObj();
-                }
+            if (lexer.isEnd) return null;
+            switch (lexer.head) {
+            case '(':
+            case '[':
+            case '{':
+                return ReadList(lexer);
+            case '\'':
+                return ReadQuote(lexer);
+            default:
+                return lexer.ReadObj();
             }
         }
 
@@ -222,27 +200,37 @@ namespace Nela.ChipLisp {
 
         private Obj ReadList(Lexer lexer) {
             var sourcePos = lexer.GetCurrentSourcePos();
-            lexer.NextChar();
+            lexer.Next();
             Obj head = Obj.nil;
             while (true) {
+                switch (lexer.head) {
+                case ')':
+                case ']':
+                case '}':
+                    {
+                        lexer.Next();
+                        var ret = Reverse(head);
+                        ret.sourcePos = sourcePos;
+                        return ret;
+                    }
+                case '.':
+                    if (!lexer.reader.PeekChar(out var ch) || !char.IsDigit(ch))
+                    {
+                        lexer.Next();
+                        var last = ReadExpr(lexer);
+                        lexer.Consume(')');
+                        var ret = Reverse(head);
+                        (head as CellObj).cdr = last;
+                        ret.sourcePos = sourcePos;
+                        return ret;
+                    }
+
+                    break;
+                }
+
                 var obj = ReadExpr(lexer);
                 if (obj == null)
                     throw new Exception("unclosed parenthesis");
-                if (obj == CParenObj.cParen) {
-                    var ret = Reverse(head);
-                    ret.sourcePos = sourcePos;
-                    return ret;
-                }
-
-                if (obj == DotObj.dot) {
-                    var last = ReadExpr(lexer);
-                    if (ReadExpr(lexer) != CParenObj.cParen)
-                        throw new Exception("Closed parenthesis expected after dot");
-                    var ret = Reverse(head);
-                    (head as CellObj).cdr = last;
-                    ret.sourcePos = sourcePos;
-                    return ret;
-                }
 
                 head = Cons(obj, head);
             }
@@ -250,7 +238,7 @@ namespace Nela.ChipLisp {
 
         private Obj ReadQuote(Lexer lexer) {
             var sourcePos = lexer.GetCurrentSourcePos();
-            lexer.NextChar();
+            lexer.Next();
             var sym = Intern("quote");
             var o = Cons(sym, Cons(ReadExpr(lexer), Obj.nil));
             o.sourcePos = sourcePos;

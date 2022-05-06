@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -16,7 +17,7 @@ namespace Nela.ChipLisp {
         public Lexer(VM vm, TextReader reader) {
             this.vm = vm;
             this.reader = reader;
-            NextChar();
+            Next();
         }
 
         public (int, int) GetCurrentSourcePos() {
@@ -26,6 +27,7 @@ namespace Nela.ChipLisp {
         public Obj ReadObj() {
             var p = (sourceLinePos, sourceCharPos);
             var o = Read();
+            SkipWhiteSpacesToNext();
             o.sourcePos = p;
             return o;
         }
@@ -58,14 +60,46 @@ namespace Nela.ChipLisp {
             throw new LexerException(this, $"Unexpected character encountered: {head}");
         }
 
-        public bool NextChar() {
+        private bool NextChar() {
             var ret = reader.ReadChar(out var c);
             head = c;
-            if (!ret) isEnd = true;
-            else {
-                sourceCharPos++;
+            if (!ret) {
+                isEnd = true;
+                return false;
             }
+
+            sourceCharPos++;
             return ret;
+        }
+
+        public bool Next() {
+            if (!NextChar()) return false;
+            return SkipWhiteSpacesToNext();
+        }
+
+        public void Consume(char c) {
+            if (c != head)
+                throw new Exception($"Expected {c} but got {head}");
+            Next();
+        }
+
+        private bool SkipWhiteSpacesToNext() {
+            while (true) {
+                switch (head) {
+                case '\n':
+                    OnNextLine();
+                    break;
+                case ';':
+                    SkipLine();
+                    break;
+                default:
+                    if (!char.IsWhiteSpace(head))
+                        return true;
+                    break;
+                }
+
+                if (!NextChar()) return false;
+            }
         }
 
         public void SkipLine() {
@@ -74,7 +108,6 @@ namespace Nela.ChipLisp {
                 return;
             }
             OnNextLine();
-            NextChar();
         }
 
         public void OnNextLine() {

@@ -155,23 +155,6 @@ namespace Nela.ChipLisp {
         }
     }
 
-    public class DotObj : Obj {
-        public static DotObj dot = new DotObj();
-        private DotObj() {}
-
-        public override void Print(TextWriter writer) {
-            writer.Write(".");
-        }
-    }
-
-    public class CParenObj : Obj {
-        public static CParenObj cParen = new CParenObj();
-        private CParenObj() {}
-        public override void Print(TextWriter writer) {
-            writer.Write(")");
-        }
-    }
-
     public delegate Obj PrimitiveFunc(VM vm, Env env, Obj args);
 
     // for tail call optimization
