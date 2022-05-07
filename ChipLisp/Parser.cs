@@ -1,8 +1,12 @@
 using System;
 
 namespace Nela.ChipLisp {
-    public class Parser {
-        public Obj ReadExpr(Lexer lexer) {
+    public interface IParser {
+        Obj ReadExpr(ILexer lexer);
+    }
+
+    public class Parser : IParser {
+        public virtual Obj ReadExpr(ILexer lexer) {
             switch (lexer.head) {
             case '\0':
                 return null;
@@ -13,11 +17,11 @@ namespace Nela.ChipLisp {
             case '\'':
                 return ReadQuote(lexer);
             default:
-                return lexer.ReadObj();
+                return lexer.Read();
             }
         }
 
-        private Obj ReadList(Lexer lexer) {
+        private Obj ReadList(ILexer lexer) {
             var sourcePos = lexer.GetCurrentSourcePos();
             lexer.Next();
             Obj head = Obj.nil;
@@ -33,7 +37,7 @@ namespace Nela.ChipLisp {
                         return ret;
                     }
                 case '.':
-                    if (!lexer.reader.PeekChar(out var ch) || !char.IsDigit(ch))
+                    if (!lexer.PeekChar(out var ch) || !char.IsDigit(ch))
                     {
                         lexer.Next();
                         var last = ReadExpr(lexer);
@@ -55,7 +59,7 @@ namespace Nela.ChipLisp {
             }
         }
 
-        private Obj ReadQuote(Lexer lexer) {
+        private Obj ReadQuote(ILexer lexer) {
             var sourcePos = lexer.GetCurrentSourcePos();
             lexer.Next();
             var sym = VM.Intern("quote");

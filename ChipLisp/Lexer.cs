@@ -1,10 +1,17 @@
-using System;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
 
 namespace Nela.ChipLisp {
-    public class Lexer {
+    public interface ILexer {
+        char head { get; }
+        Obj Read();
+        void Next();
+        bool PeekChar(out char ch);
+        (int, int) GetCurrentSourcePos();
+    }
+
+    public class Lexer : ILexer {
         private const string symbolChars = "~!@#$%^&*-_=+:/?<>";
 
         public char head {
@@ -34,15 +41,17 @@ namespace Nela.ChipLisp {
             return (sourceLinePos, sourceCharPos);
         }
 
-        public Obj ReadObj() {
+        public bool PeekChar(out char ch) => reader.PeekChar(out ch);
+
+        public Obj Read() {
             var p = (sourceLinePos, sourceCharPos);
-            var o = Read();
+            var o = ReadObj();
             SkipWhiteSpacesToNext();
             o.sourcePos = p;
             return o;
         }
 
-        private Obj Read() {
+        protected virtual Obj ReadObj() {
             switch (head) {
             case '\"':
                 return ReadString();
@@ -87,12 +96,6 @@ namespace Nela.ChipLisp {
             }
 
             headOnRequest = true;
-        }
-
-        public void Consume(char c) {
-            if (c != head)
-                throw new Exception($"Expected {c} but got {head}(ANSI {(int)head})");
-            Next();
         }
 
         private bool SkipWhiteSpacesToNext() {

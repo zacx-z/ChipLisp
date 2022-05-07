@@ -208,6 +208,13 @@ namespace Nela.ChipLisp {
             }, func.Method.Name);
         }
 
+        public static void Consume(this ILexer lexer, char c) {
+            var head = lexer.head;
+            if (c != head)
+                throw new Exception($"Expected {c} but got {head}(ANSI {(int)head})");
+            lexer.Next();
+        }
+
         public static bool ReadChar(this TextReader reader, out char c) {
             int b = reader.Read();
             if (b == -1) {
