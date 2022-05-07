@@ -48,19 +48,19 @@ namespace Nela.ChipLisp {
         }
 
         public void AddVariable(string sym, Obj val) {
-            env.AddVariable(vm.Intern(sym), val);
+            env.AddVariable(VM.Intern(sym), val);
         }
 
         public void AddFunction(string sym, PrimitiveFunc func) {
-            env.AddVariable(vm.Intern(sym), new PrimObj((vm, env, list) => func(vm, env, vm.EvalListExt(env, list)), func.Method.Name));
+            env.AddVariable(VM.Intern(sym), new PrimObj((vm, env, list) => func(vm, env, vm.EvalListExt(env, list)), func.Method.Name));
         }
 
         public void AddFunction(string sym, PrimitiveFunc func, string funcName) {
-            env.AddVariable(vm.Intern(sym), new PrimObj((vm, env, list) => func(vm, env, vm.EvalListExt(env, list)), funcName));
+            env.AddVariable(VM.Intern(sym), new PrimObj((vm, env, list) => func(vm, env, vm.EvalListExt(env, list)), funcName));
         }
 
         public void AddPrimitive(string sym, PrimitiveFunc func) {
-            env.AddVariable(vm.Intern(sym), new PrimObj(func));
+            env.AddVariable(VM.Intern(sym), new PrimObj(func));
         }
     }
 }

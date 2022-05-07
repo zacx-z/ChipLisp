@@ -6,10 +6,10 @@ namespace Nela.ChipLisp {
     public class VM {
         public static VM vm = new VM();
 
-        private Dictionary<string, SymObj> symbols = new Dictionary<string, SymObj>();
+        private static Dictionary<string, SymObj> symbols = new Dictionary<string, SymObj>();
         private int stackCount;
 
-        public SymObj Intern(string name) {
+        public static SymObj Intern(string name) {
             if (symbols.TryGetValue(name, out var ret)) {
                 return ret;
             }
@@ -60,7 +60,7 @@ namespace Nela.ChipLisp {
             return true;
         }
 
-        public Obj ReadExpr(TextReader reader) => ReadExpr(new Lexer(this, reader));
+        public Obj ReadExpr(TextReader reader) => ReadExpr(new Lexer(reader));
 
         public Obj ReadExpr(Lexer lexer) {
             switch (lexer.head) {

@@ -7,8 +7,6 @@ namespace Nela.ChipLisp {
     public class Lexer {
         private const string symbolChars = "~!@#$%^&*-_=+:/?<>";
 
-        private VM vm;
-
         public char head {
             get {
                 if (headOnRequest) {
@@ -27,8 +25,7 @@ namespace Nela.ChipLisp {
         private int sourceLinePos = 1;
         private int sourceCharPos = 0;
 
-        public Lexer(VM vm, TextReader reader) {
-            this.vm = vm;
+        public Lexer(TextReader reader) {
             this.reader = reader;
             Next();
         }
@@ -195,7 +192,7 @@ namespace Nela.ChipLisp {
                 str.Append(head);
             }
 
-            return vm.Intern(str.ToString());
+            return VM.Intern(str.ToString());
         }
     }
 }
