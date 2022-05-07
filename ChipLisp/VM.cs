@@ -60,23 +60,6 @@ namespace Nela.ChipLisp {
             return true;
         }
 
-        public Obj ReadExpr(TextReader reader) => ReadExpr(new Lexer(reader));
-
-        public Obj ReadExpr(Lexer lexer) {
-            switch (lexer.head) {
-            case '\0':
-                return null;
-            case '(':
-            case '[':
-            case '{':
-                return ReadList(lexer);
-            case '\'':
-                return ReadQuote(lexer);
-            default:
-                return lexer.ReadObj();
-            }
-        }
-
         public Obj Apply(Env env, Obj fn, Obj args) {
             if (fn is PrimObj prim) {
                 try {
@@ -178,8 +161,12 @@ namespace Nela.ChipLisp {
             return new Env(map, env);
         }
 
+        public Obj Error(string errorMessage) {
+            throw new RuntimeException(errorMessage);
+        }
+
         // Destructively reverses the given list
-        public Obj Reverse(Obj p) {
+        public static Obj Reverse(Obj p) {
             Obj ret = Obj.nil;
             while (p != Obj.nil) {
                 var head = p as CellObj;
@@ -191,59 +178,8 @@ namespace Nela.ChipLisp {
             return ret;
         }
 
-        public CellObj Cons(Obj car, Obj cdr) {
+        public static CellObj Cons(Obj car, Obj cdr) {
             return new CellObj(car, cdr);
-        }
-
-        public Obj Error(string errorMessage) {
-            throw new RuntimeException(errorMessage);
-        }
-
-        private Obj ReadList(Lexer lexer) {
-            var sourcePos = lexer.GetCurrentSourcePos();
-            lexer.Next();
-            Obj head = Obj.nil;
-            while (true) {
-                switch (lexer.head) {
-                case ')':
-                case ']':
-                case '}':
-                    {
-                        lexer.Next();
-                        var ret = Reverse(head);
-                        ret.sourcePos = sourcePos;
-                        return ret;
-                    }
-                case '.':
-                    if (!lexer.reader.PeekChar(out var ch) || !char.IsDigit(ch))
-                    {
-                        lexer.Next();
-                        var last = ReadExpr(lexer);
-                        lexer.Consume(')');
-                        var ret = Reverse(head);
-                        (head as CellObj).cdr = last;
-                        ret.sourcePos = sourcePos;
-                        return ret;
-                    }
-
-                    break;
-                }
-
-                var obj = ReadExpr(lexer);
-                if (obj == null)
-                    throw new Exception("unclosed parenthesis");
-
-                head = Cons(obj, head);
-            }
-        }
-
-        private Obj ReadQuote(Lexer lexer) {
-            var sourcePos = lexer.GetCurrentSourcePos();
-            lexer.Next();
-            var sym = Intern("quote");
-            var o = Cons(sym, Cons(ReadExpr(lexer), Obj.nil));
-            o.sourcePos = sourcePos;
-            return o;
         }
     }
 }

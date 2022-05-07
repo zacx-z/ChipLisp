@@ -17,8 +17,8 @@ namespace Nela.ChipLisp {
         }
 
         public Obj Eval(string expr) => Eval(new StringReader(expr));
-        public Obj Eval(Lexer lexer) => Eval(VM.vm.ReadExpr(lexer));
-        public Obj Eval(TextReader reader) => Eval(VM.vm.ReadExpr(reader));
+        public Obj Eval(TextReader reader) => Eval(new Lexer(reader));
+        public Obj Eval(Lexer lexer) => Eval(new Parser().ReadExpr(lexer));
         public Obj Eval(Obj expr) => VM.vm.Eval(env, expr);
 
         public void PushEnv() {
