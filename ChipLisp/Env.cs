@@ -19,10 +19,8 @@ namespace Nela.ChipLisp {
 
         public Obj Find(SymObj sym) {
             for (var p = this; p != null; p = p.up) {
-                foreach (var bind in p.vars) {
-                    if (sym == bind.car)
-                        return bind.cdr;
-                }
+                var o = p.FindLocal(sym);
+                if (o != null) return o;
             }
 
             if (onMissing != null) {
@@ -31,6 +29,15 @@ namespace Nela.ChipLisp {
             }
 
             throw new SymbolNotFoundException(sym, this);
+        }
+
+        public Obj FindLocal(SymObj sym) {
+            foreach (var bind in this.vars) {
+                if (sym == bind.car)
+                    return bind.cdr;
+            }
+
+            return null;
         }
 
         public void AddVariable(SymObj sym, Obj val) {

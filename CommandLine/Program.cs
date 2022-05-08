@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Nela.ChipLisp.LangExtensions;
 
 namespace Nela.ChipLisp.CommandLine {
     internal class Program {
@@ -14,11 +15,28 @@ namespace Nela.ChipLisp.CommandLine {
                 Console.WriteLine();
                 return Obj.nil;
             });
-            if (args.Length > 0) {
+            string mainFile = null;
+            bool useExtension = false;
+
+            foreach (var arg in args) {
+                if (arg.StartsWith("--")) {
+                    switch (arg) {
+                    case "--ext":
+                        useExtension = true;
+                        break;
+                    }
+                } else {
+                    mainFile = arg;
+                }
+            }
+
+            var parser = useExtension ? new ExtendedParser() : new Parser();
+
+            if (mainFile != null) {
                 var reader = new StreamReader(args[0]);
                 var lexer = new Lexer(reader);
                 while (lexer.head != 0) {
-                    state.Eval(lexer);
+                    state.Eval(parser.ReadExpr(lexer));
                 }
             }
             else {
@@ -27,7 +45,8 @@ namespace Nela.ChipLisp.CommandLine {
                 while (true) {
                     Console.Write("> ");
                     try {
-                        Console.WriteLine(state.Eval(Console.In));
+                        var expr = parser.ReadExpr(new Lexer(Console.In));
+                        Console.WriteLine(state.Eval(expr));
                         Console.In.ReadLine();
                     }
                     catch (InterpreterException e) {

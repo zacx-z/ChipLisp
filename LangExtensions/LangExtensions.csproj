@@ -4,15 +4,13 @@
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-        <ProjectGuid>{08FF1A13-D4A2-4619-A3BA-4CAC9A181E3B}</ProjectGuid>
-        <OutputType>Exe</OutputType>
+        <ProjectGuid>{01734ACF-22A2-42A4-82CD-1C20F030BD12}</ProjectGuid>
+        <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>Nela.ChipLisp.CommandLine</RootNamespace>
-        <AssemblyName>ichiplisp</AssemblyName>
+        <RootNamespace>Nela.ChipLisp.LangExtensions</RootNamespace>
+        <AssemblyName>LangExtensions</AssemblyName>
         <TargetFrameworkVersion>v4.7.1</TargetFrameworkVersion>
         <FileAlignment>512</FileAlignment>
-        <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
-        <LangVersion>7</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
         <PlatformTarget>AnyCPU</PlatformTarget>
@@ -40,17 +38,14 @@
         <Reference Include="System.Xml" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Program.cs" />
+        <Compile Include="Obj.cs" />
+        <Compile Include="ExtendedParser.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>
       <ProjectReference Include="..\ChipLisp\ChipLisp.csproj">
         <Project>{506847cb-d228-4db8-b5fd-45f8d9228120}</Project>
         <Name>ChipLisp</Name>
-      </ProjectReference>
-      <ProjectReference Include="..\LangExtensions\LangExtensions.csproj">
-        <Project>{01734acf-22a2-42a4-82cd-1c20f030bd12}</Project>
-        <Name>LangExtensions</Name>
       </ProjectReference>
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
