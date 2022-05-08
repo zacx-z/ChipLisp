@@ -22,6 +22,9 @@ namespace Nela.ChipLisp {
             if (obj == null) return null;
             stackCount++;
             try {
+                while (obj is TailCallObj tail) {
+                    obj = tail.OnEval(this, env);
+                }
                 var res = EvalToTailCall(env, obj);
                 while (res is TailCallObj tail) {
                     res = tail.OnEval(this, env);

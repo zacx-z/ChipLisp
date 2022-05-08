@@ -75,7 +75,7 @@ namespace Nela.ChipLisp {
                 return vm.Apply(env, fn, args);
             }
             catch (InvalidCallException) {
-                throw new Exception($"Invalid Call: {this.car} is not a function");
+                throw new Exception($"Invalid Call: Expected a function for {this.car} but got {fn}");
             }
         }
 

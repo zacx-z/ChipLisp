@@ -16,7 +16,7 @@ namespace Nela.ChipLisp.CommandLine {
                 }
                 Console.WriteLine();
                 return Obj.nil;
-            });
+            }, "Put");
             var scriptFiles = new List<string>();
             bool useExtension = false;
             bool repl = false;

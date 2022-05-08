@@ -20,6 +20,7 @@ namespace Nela.ChipLisp {
             state.AddPrimitive("defmacro", Prim_Defmacro);
             state.AddPrimitive("lambda", Prim_Lambda);
             state.AddPrimitive("macroexpand", Prim_MacroExpand);
+            state.AddPrimitive("progn", Prim_Progn);
             state.AddPrimitive("if", Prim_If);
             state.AddPrimitive("while", Prim_While);
             state.AddPrimitive("let", Prim_Let);
@@ -224,6 +225,10 @@ namespace Nela.ChipLisp {
                 return ret;
             }
             return vm.Error("malformed macroexpand");
+        }
+
+        private static Obj Prim_Progn(VM vm, Env env, Obj list) {
+            return vm.Progn(env, list);
         }
 
         private static Obj Prim_If(VM vm, Env env, Obj list) {
