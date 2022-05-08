@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using Nela.ChipLisp.LangExtensions;
+using Nela.ChipLisp.Libs;
 
 namespace Nela.ChipLisp.CommandLine {
     internal class Program {
@@ -15,31 +17,49 @@ namespace Nela.ChipLisp.CommandLine {
                 Console.WriteLine();
                 return Obj.nil;
             });
-            string mainFile = null;
+            var scriptFiles = new List<string>();
             bool useExtension = false;
+            bool repl = false;
 
-            foreach (var arg in args) {
+            for (int i = 0; i < args.Length; i++) {
+                var arg = args[i];
                 if (arg.StartsWith("--")) {
                     switch (arg) {
                     case "--ext":
                         useExtension = true;
                         break;
+                    case "--repl":
+                        repl = true;
+                        break;
+                    case "--lib":
+                        i++;
+                        if (i < args.Length) {
+                            switch (args[i].ToLower()) {
+                            case "clr":
+                                state.LoadLib(ClrLib.Load);
+                                break;
+                            }
+                        }
+
+                        break;
                     }
                 } else {
-                    mainFile = arg;
+                    scriptFiles.Add(arg);
                 }
             }
 
             var parser = useExtension ? new ExtendedParser() : new Parser();
 
-            if (mainFile != null) {
-                var reader = new StreamReader(args[0]);
-                var lexer = new Lexer(reader);
-                while (lexer.head != 0) {
-                    state.Eval(parser.ReadExpr(lexer));
+            if (scriptFiles.Count > 0) {
+                foreach (var f in scriptFiles) {
+                    var reader = new StreamReader(f);
+                    var lexer = new Lexer(reader);
+                    while (lexer.head != 0) {
+                        state.Eval(parser.ReadExpr(lexer));
+                    }
                 }
             }
-            else {
+            if (scriptFiles.Count == 0 || repl) {
                 // repl
                 Console.CancelKeyPress += OnCancel;
                 while (true) {

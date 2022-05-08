@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -17,8 +18,7 @@ namespace Nela.ChipLisp {
         public char head {
             get {
                 if (headOnRequest) {
-                    if (NextChar())
-                        SkipWhiteSpacesToNext();
+                    SkipWhiteSpacesToNext();
                     headOnRequest = false;
                 }
                 return _head;
@@ -46,7 +46,8 @@ namespace Nela.ChipLisp {
         public Obj Read() {
             var p = (sourceLinePos, sourceCharPos);
             var o = ReadObj();
-            SkipWhiteSpacesToNext();
+            Debug.Assert(!headOnRequest);
+            headOnRequest = true;
             o.sourcePos = p;
             return o;
         }
@@ -95,6 +96,7 @@ namespace Nela.ChipLisp {
                 var _ = head;
             }
 
+            NextChar();
             headOnRequest = true;
         }
 
