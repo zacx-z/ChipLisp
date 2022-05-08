@@ -49,8 +49,8 @@ namespace Nela.ChipLisp {
                 return false;
             }
 
-            var bind = env.Find(sym);
-            if (bind == null || !(bind.cdr is MacroObj macro)) {
+            var val = env.Find(sym);
+            if (val == null || !(val is MacroObj macro)) {
                 expanded = Obj.nil;
                 return false;
             }

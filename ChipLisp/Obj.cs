@@ -104,7 +104,7 @@ namespace Nela.ChipLisp {
         public string name;
 
         public override Obj OnEval(VM vm, Env env) {
-            return env.Find(this).cdr;
+            return env.Find(this);
         }
 
         public override void Print(TextWriter writer) {
