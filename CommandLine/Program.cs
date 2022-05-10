@@ -9,14 +9,14 @@ namespace Nela.ChipLisp.CommandLine {
         public static void Main(string[] args) {
             var state = new State();
             state.LoadPreludeLib();
-            state.AddFunction("put", (vm, env, list) => {
+            state.AddFunction("display", (vm, env, list) => {
                 var e = list.GetListEnumerator();
                 while (e.GetNext(out var arg)) {
                     arg.Print(Console.Out);
                 }
                 Console.WriteLine();
                 return Obj.nil;
-            }, "Put");
+            }, "Display");
             var scriptFiles = new List<string>();
             bool useExtension = false;
             bool repl = false;
