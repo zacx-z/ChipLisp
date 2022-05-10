@@ -41,7 +41,7 @@ namespace Nela.ChipLisp {
             return default(T);
         }
 
-        public static Obj ExpectOr(this VM vm, Obj obj, params Expect.ConditionBranch[] group) {
+        public static T ExpectOr<T>(this VM vm, Obj obj, params Expect.ConditionBranch<T>[] group) {
             foreach (var g in group) {
                 var ret = g.processor(obj);
                 if (ret != null)
@@ -49,7 +49,7 @@ namespace Nela.ChipLisp {
             }
             
             vm.Error($"Expected type among {string.Join(", ", group.Select(g => Utils.GetObjTypeName(g.type)))} but got {obj}");
-            return null;
+            return default(T);
         }
 
         public static void ExpectList0(this VM vm, Obj list) {
@@ -242,25 +242,38 @@ namespace Nela.ChipLisp {
         }
 
         public static string GetObjTypeName(Type t) {
-            return typeof(ValueObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name;
+            return typeof(IValueObj).IsAssignableFrom(t) ? t.GenericTypeArguments[0].Name : t.Name;
         }
     }
 
     public static class Expect {
-        public struct ConditionBranch {
-            public delegate Obj ExpectProcessor(Obj obj);
+        public struct ConditionBranch<T> {
+            public delegate T ExpectProcessor(Obj obj);
             public Type type;
             public ExpectProcessor processor;
         }
-        public static ConditionBranch On<T>(Func<T, Obj> callback) where T : Obj {
-            return new ConditionBranch() {
+        public static ConditionBranch<U> On<T, U>(Func<T, U> callback) where T : Obj {
+            return new ConditionBranch<U>() {
                 type = typeof(T),
                 processor = obj => {
                     if (obj is T o) {
                         return callback(o);
                     }
 
-                    return null;
+                    return default(U);
+                }
+            };
+        }
+
+        public static ConditionBranch<U> OnValue<T, U>(Func<T, U> callback) {
+            return new ConditionBranch<U>() {
+                type = typeof(IValueObj<T>),
+                processor = obj => {
+                    if (obj is IValueObj<T> o) {
+                        return callback(o.value);
+                    }
+
+                    return default(U);
                 }
             };
         }

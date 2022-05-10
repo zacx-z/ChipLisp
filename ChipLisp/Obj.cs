@@ -30,14 +30,16 @@ namespace Nela.ChipLisp {
             writer.Write("()");
         }
     }
+    
+    public interface IValueObj {}
 
-    public abstract class ValueObj : Obj {
+    public abstract class ValueObj : Obj, IValueObj {
         public override Obj OnEval(VM vm, Env env) {
             return this;
         }
     }
 
-    public interface IValueObj<out T> {
+    public interface IValueObj<out T> : IValueObj {
         T value { get; }
     }
 

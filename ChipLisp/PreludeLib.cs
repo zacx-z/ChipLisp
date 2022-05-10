@@ -140,8 +140,8 @@ namespace Nela.ChipLisp {
         private static Obj Prim_Divide(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
             return vm.ExpectOr(lhs
-                , Expect.On<ValueObj<float>>(f => new ValueObj<float>(f.value / vm.Expect<ValueObj<float>>(rhs).value))
-                , Expect.On<ValueObj<int>>(f => new ValueObj<int>(f.value / vm.Expect<ValueObj<int>>(rhs).value))
+                , Expect.On<ValueObj<float>, Obj>(f => new ValueObj<float>(f.value / vm.Expect<ValueObj<float>>(rhs).value))
+                , Expect.On<ValueObj<int>, Obj>(f => new ValueObj<int>(f.value / vm.Expect<ValueObj<int>>(rhs).value))
                 );
         }
 
