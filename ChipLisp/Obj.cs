@@ -140,7 +140,14 @@ namespace Nela.ChipLisp {
         }
 
         public override void Print(TextWriter writer) {
-            writer.Write("<function>");
+            writer.Write("(lambda ");
+            pmtrs.Print(writer);
+            var enumerator = body.GetListEnumerator();
+            while (enumerator.GetNext(out var p)) {
+                writer.Write("\n\t");
+                p.Print(writer);
+            }
+            writer.Write("\n)");
         }
     }
     
