@@ -56,6 +56,8 @@ namespace Nela.ChipLisp {
             switch (head) {
             case '\"':
                 return ReadString();
+            case '\\':
+                return ReadChar();
             case '-':
                 if (reader.PeekChar(out var ch) && char.IsDigit(ch)) {
                     NextChar();
@@ -184,6 +186,33 @@ namespace Nela.ChipLisp {
             if (head == '\"') {
                 NextChar();
                 return new ValueObj<string>(Regex.Unescape(str.ToString()));
+            }
+
+            throw new LexerException(this, "Unexpected end of file.");
+        }
+
+        private ValueObj<char> ReadChar() {
+            NextChar();
+            var str = new StringBuilder();
+            bool escaping = false;
+            if (head != '\'')
+                throw new LexerException(this, $"Expected {"'"} but got {head}");
+
+            while (NextChar() && (head != '\'' || escaping)) {
+                str.Append(head);
+                if (!escaping && head == '\\') {
+                    escaping = true;
+                } else {
+                    escaping = false;
+                }
+            }
+
+            if (head == '\'') {
+                NextChar();
+                var s = Regex.Unescape(str.ToString());
+                if (s.Length != 1)
+                    throw new LexerException(this, $"Invalid char literal {str}");
+                return new ValueObj<char>(s[0]);
             }
 
             throw new LexerException(this, "Unexpected end of file.");

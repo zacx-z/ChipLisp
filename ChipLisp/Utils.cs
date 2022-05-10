@@ -211,7 +211,7 @@ namespace Nela.ChipLisp {
         public static void Consume(this ILexer lexer, char c) {
             var head = lexer.head;
             if (c != head)
-                throw new Exception($"Expected {c} but got {head}(ANSI {(int)head})");
+                throw new LexerException(lexer, $"Expected {c} but got {head}(ANSI {(int)head})");
             lexer.Next();
         }
 
