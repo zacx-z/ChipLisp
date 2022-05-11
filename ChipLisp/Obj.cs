@@ -204,7 +204,7 @@ namespace Nela.ChipLisp {
             this.targetEnv = targetEnv;
         }
 
-        public override Obj OnEval(VM vm, Env env) {
+        public Obj Execute(VM vm) {
             return vm.EvalToTailCall(targetEnv, evalTarget);
         }
 

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 using System.Collections.Generic;
 
 namespace Nela.ChipLisp {
@@ -23,11 +22,11 @@ namespace Nela.ChipLisp {
             stackCount++;
             try {
                 while (obj is TailCallObj tail) {
-                    obj = tail.OnEval(this, env);
+                    obj = tail.Execute(this);
                 }
                 var res = EvalToTailCall(env, obj);
                 while (res is TailCallObj tail) {
-                    res = tail.OnEval(this, env);
+                    res = tail.Execute(this);
                 }
                 return res;
             }
