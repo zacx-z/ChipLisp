@@ -12,6 +12,10 @@ namespace Nela.ChipLisp {
             throw new InvalidObjException(this);
         }
 
+        public virtual bool OnEql(Obj other) {
+            return this == other;
+        }
+
         public abstract void Print(TextWriter writer);
 
         public override string ToString() {
@@ -51,6 +55,14 @@ namespace Nela.ChipLisp {
             this.value = value;
         }
 
+        public override bool OnEql(Obj other) {
+            if (other is IValueObj<T> o) {
+                return value.Equals(o.value);
+            }
+
+            return false;
+        }
+
         public override void Print(TextWriter writer) {
             writer.Write(value.ToString());
         }
@@ -79,6 +91,14 @@ namespace Nela.ChipLisp {
             catch (InvalidCallException) {
                 throw new Exception($"Invalid Call: Expected a function for {this.car} but got {fn}");
             }
+        }
+
+        public override bool OnEql(Obj other) {
+            if (other is CellObj o) {
+                return car.OnEql(o.car) && cdr.OnEql(o.cdr);
+            }
+
+            return false;
         }
 
         public override void Print(TextWriter writer) {
@@ -139,6 +159,14 @@ namespace Nela.ChipLisp {
 
         public override Obj OnEval(VM vm, Env env) {
             return this;
+        }
+
+        public override bool OnEql(Obj other) {
+            if (other is FuncObj o) {
+                return env == o.env && pmtrs.OnEql(o.pmtrs) && body.OnEql(o.body);
+            }
+
+            return false;
         }
 
         public override void Print(TextWriter writer) {

@@ -14,6 +14,7 @@ namespace Nela.ChipLisp {
             state.AddFunction("<", Prim_Lt);
             state.AddFunction("=", Prim_NumEq);
             state.AddFunction("eq", Prim_Eq);
+            state.AddFunction("eql", Prim_Eql);
             state.AddFunction("eval", Prim_Eval);
             state.AddPrimitive("define", Prim_Define);
             state.AddPrimitive("defun", Prim_Defun);
@@ -171,12 +172,18 @@ namespace Nela.ChipLisp {
         // only on integers
         private static Obj Prim_NumEq(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
-            return vm.Expect<ValueObj<int>>(lhs).value == vm.Expect<ValueObj<int>>(rhs).value ? (Obj)TrueObj.t : Obj.nil;
+            return vm.ExpectValue<int>(lhs) == vm.ExpectValue<int>(rhs) ? (Obj)TrueObj.t : Obj.nil;
         }
 
         private static Obj Prim_Eq(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
             return lhs == rhs ? (Obj)TrueObj.t : Obj.nil;
+        }
+
+        private static Obj Prim_Eql(VM vm, Env env, Obj args) {
+            var (lhs, rhs) = vm.ExpectList2(args);
+            if (lhs.GetType() != rhs.GetType()) return Obj.nil;
+            return lhs.OnEql(rhs) ? (Obj)TrueObj.t : Obj.nil;
         }
 
         private static Obj Prim_Eval(VM vm, Env env, Obj args) {
