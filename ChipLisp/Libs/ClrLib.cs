@@ -18,8 +18,8 @@ namespace Nela.ChipLisp.Libs {
             state.AddFunction("clr-is", Prim_Is);
             state.AddFunction("clr-new", Prim_New);
             state.AddFunction("clr-get-types", Prim_GetType);
-            state.AddPrimitive("clr-call", Prim_Call);
-            state.AddPrimitive("clr-call-member", Prim_CallMember);
+            state.AddFunction("clr-call", Prim_Call);
+            state.AddFunction("clr-call-member", Prim_CallMember);
             state.AddFunction("clr-methods", Prim_Methods);
             state.AddFunction("clr-static-methods", Prim_StaticMethods);
             // with local using scope
@@ -105,17 +105,17 @@ namespace Nela.ChipLisp.Libs {
         private static Obj Call(VM vm, Env env, Type type, object self, string method, ListEnumerator args, BindingFlags bindingFlags) {
             var callArgs = new List<object>();
             while (args.GetNext(out var p)) {
-                callArgs.Add(vm.ExpectValue<object>(vm.Eval(env, p)));
+                callArgs.Add(vm.ExpectValue<object>(p));
             }
 
             object res;
             if (!method.StartsWith("@")) {
-                res = self.GetType().GetMethod(method, bindingFlags)
+                res = type.GetMethod(method, bindingFlags)
                     .Invoke(self, callArgs.ToArray());
             }
             else {
                 if (!method.StartsWith("@:")) {
-                    var property = self.GetType()
+                    var property = type
                         .GetProperty(method.Substring(1), bindingFlags);
                     if (callArgs.Count == 0) res = property.GetValue(self);
                     else {
@@ -123,7 +123,7 @@ namespace Nela.ChipLisp.Libs {
                         res = callArgs[0];
                     }
                 } else {
-                    var field = self.GetType()
+                    var field = type
                         .GetField(method.Substring(2), bindingFlags);
                     if (callArgs.Count == 0) res = field.GetValue(self);
                     else {
@@ -140,14 +140,15 @@ namespace Nela.ChipLisp.Libs {
         private static Obj Prim_Call(VM vm, Env env, Obj args) {
             var enumerator = args.GetListEnumerator();
             enumerator.GetNext(out var oType);
-            var type = vm.ExpectValue<Type>(vm.Eval(env, oType));
+            var type = vm.ExpectValue<Type>(oType);
 
             enumerator.GetNext(out var oMethod);
             var method = vm.Expect<SymObj>(oMethod).name;
 
             object self = null;
             if (enumerator.GetNext(out var oSelf)) {
-                self = vm.ExpectValue<object>(vm.Eval(env, oSelf));
+                if (oSelf == Obj.nil) self = null;
+                else self = vm.ExpectValue<object>(oSelf);
             }
 
             return Call(vm, env, type, self, method, enumerator, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
@@ -158,7 +159,7 @@ namespace Nela.ChipLisp.Libs {
             var enumerator = args.GetListEnumerator();
 
             enumerator.GetNext(out var oSelf);
-            object self = vm.ExpectValue<object>(vm.Eval(env, oSelf));
+            object self = vm.ExpectValue<object>(oSelf);
 
             enumerator.GetNext(out var oMethod);
             var method = vm.Expect<SymObj>(oMethod).name;
