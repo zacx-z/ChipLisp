@@ -53,7 +53,7 @@ namespace Nela.ChipLisp {
 
                 var obj = ReadExpr(lexer);
                 if (obj == null)
-                    throw new Exception("unclosed parenthesis");
+                    throw new ParserException("unclosed parenthesis");
 
                 head = VM.Cons(obj, head);
             }

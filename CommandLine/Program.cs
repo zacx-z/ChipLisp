@@ -20,6 +20,7 @@ namespace Nela.ChipLisp.CommandLine {
             var scriptFiles = new List<string>();
             bool useExtension = false;
             bool repl = false;
+            bool stacktrace = false;
 
             for (int i = 0; i < args.Length; i++) {
                 var arg = args[i];
@@ -31,6 +32,9 @@ namespace Nela.ChipLisp.CommandLine {
                     case "--repl":
                         repl = true;
                         break;
+                    case "--stacktrace":
+                        stacktrace = true;
+                        break;
                     case "--lib":
                         i++;
                         if (i < args.Length) {
@@ -40,7 +44,9 @@ namespace Nela.ChipLisp.CommandLine {
                                 break;
                             }
                         }
-
+                        break;
+                    default:
+                        Console.WriteLine($"Invalid option: {arg}");
                         break;
                     }
                 } else {
@@ -71,6 +77,8 @@ namespace Nela.ChipLisp.CommandLine {
                     }
                     catch (InterpreterException e) {
                         Console.WriteLine(e.Message);
+                        if (stacktrace)
+                            Console.WriteLine(e.StackTrace);
                     }
                 }
             }

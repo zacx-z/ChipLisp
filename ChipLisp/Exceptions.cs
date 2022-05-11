@@ -3,10 +3,15 @@ using System;
 namespace Nela.ChipLisp {
     public class InterpreterException : Exception {
         public Exception inner { get; }
+        private Obj expr;
 
-        public InterpreterException(Obj expr, Exception inner)
-            : base($"Error while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{inner.Message}\n{inner.StackTrace}") {
+        public override string Message => $"Error while evaluating {expr} at ({expr.sourcePos.Item1}:{expr.sourcePos.Item2})\n{inner.Message}";
+
+        public override string StackTrace => $"{inner.StackTrace}\n{base.StackTrace}";
+
+        public InterpreterException(Obj expr, Exception inner) {
             this.inner = inner;
+            this.expr = expr;
         }
     }
 
@@ -24,6 +29,10 @@ namespace Nela.ChipLisp {
             this.sourcePos = lexer.GetCurrentSourcePos();
             this.restMessage = message;
         }
+    }
+
+    public class ParserException : Exception {
+        public ParserException(string message) : base(message) {}
     }
 
     public class RuntimeException : Exception {
