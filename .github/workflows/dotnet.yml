@@ -13,11 +13,11 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-#    - name: Setup MSBuild Path
-#      uses: warrenbuckley/Setup-MSBuild@v1
+    - name: Add msbuild to PATH
+      uses: microsoft/setup-msbuild@v1.1
     - name: Restore dependencies
       run: dotnet restore
     - name: Build
-      run: dotnet build
+      run: msbuild
     - name: Test
-      run: dotnet msbuild Test -t:Test
+      run: msbuild -t:Test -verbosity:m Test
