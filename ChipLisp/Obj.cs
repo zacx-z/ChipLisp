@@ -23,6 +23,10 @@ namespace Nela.ChipLisp {
             Print(writer);
             return writer.ToString();
         }
+
+        public override bool Equals(object obj) {
+            return OnEql(obj as Obj);
+        }
     }
 
     public class NilObj : Obj {
@@ -40,6 +44,10 @@ namespace Nela.ChipLisp {
     public abstract class ValueObj : Obj, IValueObj {
         public override Obj OnEval(VM vm, Env env) {
             return this;
+        }
+
+        public static ValueObj<T> Create<T>(T val) {
+            return new ValueObj<T>(val);
         }
     }
 

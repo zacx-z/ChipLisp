@@ -45,6 +45,7 @@
         <Compile Include="Exceptions.cs" />
         <Compile Include="Lexer.cs" />
         <Compile Include="Libs\ClrLib.cs" />
+        <Compile Include="Libs\VMOpLib.cs" />
         <Compile Include="Obj.cs" />
         <Compile Include="Parser.cs" />
         <Compile Include="PreludeLib.cs" />
