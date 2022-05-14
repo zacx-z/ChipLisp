@@ -38,10 +38,15 @@ namespace Nela.ChipLisp {
             writer.Write("()");
         }
     }
-    
-    public interface IValueObj {}
+
+    public interface IValueObj {
+        object untypedValue { get; }
+    }
 
     public abstract class ValueObj : Obj, IValueObj {
+        public abstract Type type { get; }
+        public abstract object untypedValue { get; }
+
         public override Obj OnEval(VM vm, Env env) {
             return this;
         }
@@ -56,6 +61,8 @@ namespace Nela.ChipLisp {
     }
 
     public class ValueObj<T> : ValueObj, IValueObj<T> {
+        public override Type type => typeof(T);
+        public override object untypedValue => value;
         T IValueObj<T>.value => value;
         public T value;
 

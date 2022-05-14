@@ -15,6 +15,7 @@ namespace Nela.ChipLisp.Libs {
             state.AddFunction("clr-all-types", Prim_GetTypes);
             state.AddFunction("clr-type-from-full-name", Prim_TypeFromFullName);
             state.AddFunction("clr-cast", Prim_Cast);
+            state.AddFunction("clr-coerce", Prim_Coerce);
             state.AddFunction("clr-is", Prim_Is);
             state.AddFunction("clr-new", Prim_New);
             state.AddFunction("clr-get-types", Prim_GetType);
@@ -34,7 +35,7 @@ namespace Nela.ChipLisp.Libs {
 
         private static IEnumerable<object> GetRestAsParams(VM vm, ListEnumerator enumerator) {
             while (enumerator.GetNext(out var p)) {
-                yield return vm.ExpectValue<object>(p);
+                yield return vm.Expect<ValueObj>(p).untypedValue;
             }
         }
 
@@ -70,18 +71,36 @@ namespace Nela.ChipLisp.Libs {
             return Obj.nil;
         }
 
+        // (clr-cast type o)
         private static Obj Prim_Cast(VM vm, Env env, Obj args) {
             var (typeObj, obj) = vm.ExpectList2(args);
-            var o = vm.ExpectValue<object>(obj);
+            var o = vm.Expect<ValueObj>(obj);
             var type = vm.ExpectValue<Type>(typeObj);
-            if (type.IsInstanceOfType(o))
-                return CreateDynamicValueObj(o, type);
+            if (type.IsInstanceOfType(o.untypedValue))
+                return CreateDynamicValueObj(o.untypedValue, type);
             return Obj.nil;
+        }
+
+        // (clr-coerce type o)
+        private static Obj Prim_Coerce(VM vm, Env env, Obj args) {
+            var (typeObj, obj) = vm.ExpectList2(args);
+            var o = vm.Expect<ValueObj>(obj);
+            var type = vm.ExpectValue<Type>(typeObj);
+
+            object res;
+            if (type.IsEnum) {
+                res = Enum.ToObject(type, o.untypedValue);
+            }
+            else {
+                res = Convert.ChangeType(o.untypedValue, type);
+            }
+
+            return CreateDynamicValueObj(res, type);
         }
 
         private static Obj Prim_Is(VM vm, Env env, Obj args) {
             var (typeObj, obj) = vm.ExpectList2(args);
-            var o = vm.ExpectValue<object>(obj);
+            var o = vm.Expect<ValueObj>(obj).untypedValue;
             var type = vm.ExpectValue<Type>(typeObj);
             if (type.IsInstanceOfType(o))
                 return TrueObj.t;
@@ -99,18 +118,20 @@ namespace Nela.ChipLisp.Libs {
 
         private static Obj Prim_GetType(VM vm, Env env, Obj args) {
             var obj = vm.ExpectList1(args);
-            return new ValueObj<Type>(vm.ExpectValue<object>(obj).GetType());
+            return new ValueObj<Type>(vm.Expect<ValueObj>(obj).type);
         }
 
         private static Obj Call(VM vm, Env env, Type type, object self, string method, ListEnumerator args, BindingFlags bindingFlags) {
             var callArgs = new List<object>();
             while (args.GetNext(out var p)) {
-                callArgs.Add(vm.ExpectValue<object>(p));
+                callArgs.Add(vm.Expect<ValueObj>(p).untypedValue);
             }
 
             object res;
             if (!method.StartsWith("@")) {
-                res = type.GetMethod(method, bindingFlags)
+                Console.WriteLine(callArgs[1]);
+                res = type.GetMethod(method, bindingFlags, null, CallingConventions.Any | CallingConventions.HasThis, 
+                        callArgs.Select(a => a.GetType()).ToArray(), null)
                     .Invoke(self, callArgs.ToArray());
             }
             else {
@@ -148,7 +169,7 @@ namespace Nela.ChipLisp.Libs {
             object self = null;
             if (enumerator.GetNext(out var oSelf)) {
                 if (oSelf == Obj.nil) self = null;
-                else self = vm.ExpectValue<object>(oSelf);
+                else self = vm.Expect<ValueObj>(oSelf).untypedValue;
             }
 
             return Call(vm, env, type, self, method, enumerator, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static);
@@ -159,7 +180,7 @@ namespace Nela.ChipLisp.Libs {
             var enumerator = args.GetListEnumerator();
 
             enumerator.GetNext(out var oSelf);
-            object self = vm.ExpectValue<object>(oSelf);
+            object self = vm.Expect<ValueObj>(oSelf).untypedValue;
 
             enumerator.GetNext(out var oMethod);
             var method = vm.Expect<SymObj>(oMethod).name;
@@ -223,6 +244,11 @@ namespace Nela.ChipLisp.Libs {
         }
 
         private static Type GetType(string typeName, Env env) {
+            foreach (var ass in assemblies) {
+                var t = ass.GetType(typeName);
+                if (t != null)
+                    return t;
+            }
             foreach (var ns in GetNamespacesInContext(env)) {
                 var fullName = $"{ns}.{typeName}";
                 foreach (var ass in assemblies) {

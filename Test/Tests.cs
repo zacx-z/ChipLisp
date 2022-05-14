@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Xunit;
 using Nela.ChipLisp;
 using Nela.ChipLisp.LangExtensions;
@@ -43,7 +44,8 @@ namespace Test {
             state.LoadLib(ClrLib.Load);
             Assert.Equal(ValueObj.Create(typeof(string)), state.Eval("(progn (clr-using \"System\") (clr-type \"String\"))"));
             Assert.Equal(ValueObj.Create(typeof(string)), state.Eval("(clr-type \"System.String\")"));
-            //Assert.Equal(ValueObj.Create(new string[]{"a", "b", "c"}), state.Eval("(clr-call-member \"a,b,c\" 'Split \",\" (clr-call (clr-type \"StringSplitOptions\") '@None ()))"));
+            Assert.Equal(ValueObj.Create("is"), state.Eval("(clr-call-member \"There is nothing.\" 'Substring 6 2)"));
+            Assert.Equal(ValueObj.Create(StringSplitOptions.None), state.Eval("(clr-coerce (clr-type \"StringSplitOptions\") 0)"));
         }
     }
 }
