@@ -1,4 +1,6 @@
 # ChipLisp
+[![.NET](https://github.com/zacx-z/ChipLisp/actions/workflows/dotnet.yml/badge.svg)](https://github.com/zacx-z/ChipLisp/actions/workflows/dotnet.yml)
+
 ChipLisp is a lightweight lisp interpreter written in C# primarily designed for embedding usage.
 
 ChipLisp is aimed for flexibility to be interacted from C# side with minimal implementation. It runs a subset of traditional lisp code with a few modifications.
@@ -93,13 +95,87 @@ For example:
 state.AddCSharpFunction<float, float>("exp", Math.Abs);
 ```
 
+### Extending the Parser
+
+You can provide new syntax by extending `Parser` class to override `ReadExpr()` method.
+
+```c#
+class MyParser : Parser {
+    // ...
+}
+```
+
+Override `Parser.ReadExpr()` to add new expressions to parse.
+
+```c#
+public override Obj ReadExpr(ILexer lexer) {
+    switch (lexer.head) {
+    case '`':
+        return ReadBackQuote(lexer);
+    case ',':
+        return ReadComma(lexer);
+    }
+    return base.ReadExpr(lexer);
+}
+```
+
+Then use your new parser to read expr:
+
+```c#
+var parser = new MyParser();
+state.Eval(parser.ReadExpr(new Lexer(textReader)));
+```
+
+### Extending the Lexer
+
+You can support more literals by extending `Lexer` class to override its `ReadObj()` method.
+
+```c#
+class MyLexer : Lexer {
+    // ...
+}
+```
+
+Override `Lexer.ReadObj` method:
+
+```c#
+protected override Obj ReadObj() {
+    switch (head) {
+    case '@':
+        return ReadNewLiteral();
+    default:
+        return base.ReadObj();
+    }
+}
+```
+
+Then use your new lexer to read from the source:
+```c#
+var lexer = new MyLexer(textReader);
+state.Eval(lexer);
+```
+
+### Manipulating the variable scope
+
+You can register a handler to `onMissing` delegate. Whenever the VM looking for a symbol that is not created, it will be called and you can customize what should be returned for that symbol. This is useful to create DSLs.
+
+```c#
+env.onMissing = o => new PrimObj(objCreateFunc);
+```
+
 ## Lisp Language
 
 There are two reserved symbols: `t` and `quote`. They are not supposed to be redefined.
 
 ChipLisp treats `[` `{` the same as `(`, and `]` `}` the same as `)`.
 
-Prelude lib provides:
+**Supported literals:**
+- int: `123`
+- float: `3.14`
+- string: `"brown fox"`
+- char: `\'a'`
+
+**Primitives "Prelude" lib provides:**
 ```lisp
 cons
 car
@@ -114,12 +190,14 @@ list
 to-i ; convert float to int
 to-f ; convert int to float
 eq ; check if two object references are the same
+eql ; check if two objects have the same value
 eval
 define
 defun
 defmacro
 lambda
 macroexpand
+progn
 if
 while
 let ; bind local variables
@@ -138,6 +216,39 @@ Example:
 (let ([x 1]
       [y 2])
      (+ x y))
+```
+
+### Extensions
+
+The Extensions project provides some extended syntax by extending the parser.
+
+**Back-quote and comma:**
+
+Back-quote provides an easier way to write macros:
+
+```lisp
+(defmacro unless (condition expr)
+    `(if, condition, (), expr)
+)
+```
+
+Similar to Common Lisp, the backquote (`) character signals that in the expression that follows, every subexpression not preceded by a comma is to be quoted, and every subexpression preceded by a comma is to be evaluated.
+it quote. It is equivalent to:
+
+```lisp
+(defmacro unless (condition expr)
+    (list 'if condition () expr)
+)
+```
+
+However, unlike in Common Lisp, it only unwraps one layer, so you need to nest back-quoted expressions in some cases:
+
+```lisp
+(defmacro plus-all args
+    (if (cdr args)
+        `(+, (car args), (eval `(macroexpand, (cons 'plus-all (cdr args)))))
+        (car args))
+)
 ```
 
 ## Advanced Topics

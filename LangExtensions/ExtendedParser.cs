@@ -1,5 +1,5 @@
 ﻿namespace Nela.ChipLisp.LangExtensions {
-    public class ExtendedParser : Parser, IParser {
+    public class ExtendedParser : Parser {
         public override Obj ReadExpr(ILexer lexer) {
             switch (lexer.head) {
             case '`':

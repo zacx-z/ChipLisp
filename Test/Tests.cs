@@ -19,6 +19,8 @@ namespace Test {
             var state = new State();
             state.LoadPreludeLib();
             Assert.Equal(ValueObj.Create(10), state.Eval("(progn (defun sum (a . b) (if b (+ a (sum . b)) a)) (sum 1 2 3 4))"));
+            state.Eval("(defun fib (n) (if (< n 2) 1 (+ (fib (- n 1)) (fib (- n 2)))))");
+            Assert.Equal(ValueObj.Create(8), state.Eval("(fib 5)"));
         }
 
         [Fact]
