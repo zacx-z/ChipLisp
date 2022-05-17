@@ -47,7 +47,7 @@ namespace Test {
             Assert.Equal(ValueObj.Create(typeof(string)), state.Eval("(progn (clr-using \"System\") (clr-type \"String\"))"));
             Assert.Equal(ValueObj.Create(typeof(string)), state.Eval("(clr-type \"System.String\")"));
             Assert.Equal(ValueObj.Create("is"), state.Eval("(clr-call-member \"There is nothing.\" 'Substring 6 2)"));
-            Assert.Equal(ValueObj.Create(StringSplitOptions.None), state.Eval("(clr-coerce (clr-type \"StringSplitOptions\") 0)"));
+            Assert.Equal(ValueObj.Create(StringSplitOptions.None), state.Eval("(clr-cast (clr-type \"StringSplitOptions\") 0)"));
         }
     }
 }

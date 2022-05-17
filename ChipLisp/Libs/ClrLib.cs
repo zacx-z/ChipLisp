@@ -14,8 +14,8 @@ namespace Nela.ChipLisp.Libs {
             state.AddFunction("clr-assemblies", Prim_GetAssemblies);
             state.AddFunction("clr-all-types", Prim_GetTypes);
             state.AddFunction("clr-type-from-full-name", Prim_TypeFromFullName);
+            state.AddFunction("clr-as", Prim_As);
             state.AddFunction("clr-cast", Prim_Cast);
-            state.AddFunction("clr-coerce", Prim_Coerce);
             state.AddFunction("clr-is", Prim_Is);
             state.AddFunction("clr-new", Prim_New);
             state.AddFunction("clr-get-types", Prim_GetType);
@@ -72,7 +72,7 @@ namespace Nela.ChipLisp.Libs {
         }
 
         // (clr-cast type o)
-        private static Obj Prim_Cast(VM vm, Env env, Obj args) {
+        private static Obj Prim_As(VM vm, Env env, Obj args) {
             var (typeObj, obj) = vm.ExpectList2(args);
             var o = vm.Expect<ValueObj>(obj);
             var type = vm.ExpectValue<Type>(typeObj);
@@ -82,7 +82,7 @@ namespace Nela.ChipLisp.Libs {
         }
 
         // (clr-coerce type o)
-        private static Obj Prim_Coerce(VM vm, Env env, Obj args) {
+        private static Obj Prim_Cast(VM vm, Env env, Obj args) {
             var (typeObj, obj) = vm.ExpectList2(args);
             var o = vm.Expect<ValueObj>(obj);
             var type = vm.ExpectValue<Type>(typeObj);
