@@ -13,7 +13,7 @@ namespace Nela.ChipLisp {
         }
 
         public virtual bool OnEql(Obj other) {
-            return this == other;
+            return this.Equals(other); // default implementation
         }
 
         public abstract void Print(TextWriter writer);
@@ -22,10 +22,6 @@ namespace Nela.ChipLisp {
             var writer = new StringWriter();
             Print(writer);
             return writer.ToString();
-        }
-
-        public override bool Equals(object obj) {
-            return OnEql(obj as Obj);
         }
     }
 

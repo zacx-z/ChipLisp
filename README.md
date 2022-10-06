@@ -97,7 +97,7 @@ state.AddCSharpFunction<float, float>("exp", Math.Abs);
 
 ### Extending the Parser
 
-You can provide new syntax by extending `Parser` class to override `ReadExpr()` method.
+You can provide new syntax by extending `Parser` class and overriding its `ReadExpr()` method.
 
 ```c#
 class MyParser : Parser {
@@ -128,7 +128,7 @@ state.Eval(parser.ReadExpr(new Lexer(textReader)));
 
 ### Extending the Lexer
 
-You can support more literals by extending `Lexer` class to override its `ReadObj()` method.
+You can support more literals as well by extending `Lexer` class and overriding its `ReadObj()` method.
 
 ```c#
 class MyLexer : Lexer {

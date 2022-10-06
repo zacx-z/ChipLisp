@@ -177,7 +177,7 @@ namespace Nela.ChipLisp {
 
         private static Obj Prim_Eq(VM vm, Env env, Obj args) {
             var (lhs, rhs) = vm.ExpectList2(args);
-            return lhs == rhs ? (Obj)TrueObj.t : Obj.nil;
+            return ReferenceEquals(lhs, rhs) ? (Obj)TrueObj.t : Obj.nil;
         }
 
         private static Obj Prim_Eql(VM vm, Env env, Obj args) {
