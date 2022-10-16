@@ -12,6 +12,10 @@ namespace Nela.ChipLisp {
             throw new InvalidObjException(this);
         }
 
+        public virtual int GetValueHash() {
+            return GetHashCode();
+        }
+
         public virtual bool OnEql(Obj other) {
             return this.Equals(other); // default implementation
         }
@@ -28,6 +32,10 @@ namespace Nela.ChipLisp {
     public class NilObj : Obj {
         public override Obj OnEval(VM vm, Env env) {
             return this;
+        }
+
+        public override int GetValueHash() {
+            return 0;
         }
 
         public override void Print(TextWriter writer) {
@@ -66,6 +74,10 @@ namespace Nela.ChipLisp {
             this.value = value;
         }
 
+        public override int GetValueHash() {
+            return value.GetHashCode();
+        }
+
         public override bool OnEql(Obj other) {
             if (other is IValueObj<T> o) {
                 return value.Equals(o.value);
@@ -102,6 +114,10 @@ namespace Nela.ChipLisp {
             catch (InvalidCallException) {
                 throw new Exception($"Invalid Call: Expected a function for {this.car} but got {fn}");
             }
+        }
+
+        public override int GetValueHash() {
+            return car.GetValueHash() ^ cdr.GetValueHash();
         }
 
         public override bool OnEql(Obj other) {
@@ -170,6 +186,10 @@ namespace Nela.ChipLisp {
 
         public override Obj OnEval(VM vm, Env env) {
             return this;
+        }
+
+        public override int GetValueHash() {
+            return env.GetHashCode() ^ pmtrs.GetValueHash() ^ body.GetValueHash();
         }
 
         public override bool OnEql(Obj other) {
